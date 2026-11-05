@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de clientes | Kane{% endblock %}
+
+{% block content %}
+    <div class="no-print">
+        <p><a href="{{ url_for('clients') }}">Volver a clientes</a></p>
+        <button type="button" onclick="window.print()">Imprimir reporte</button>
+    </div>
+    <h1>Clasificación de clientes por país</h1>
+    {% if reporte %}
+        <table>
+            <thead>
+                <tr>
+                    <th>País / nacionalidad</th>
+                    <th>Cantidad de clientes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in reporte %}
+                    <tr>
+                        <td>{{ fila.pais }}</td>
+                        <td>{{ fila.cantidad_clientes }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay clientes para incluir en el reporte.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Menú principal | Kane{% endblock %}
+
+{% block content %}
+    <h1>Menú principal</h1>
+    <p>Bienvenido, {{ nombre_usuario }}.</p>
+    <div class="card">
+        <h2>Módulo 1: Gestión de clientes</h2>
+        <p>Disponible para administradores y vendedores.</p>
+        <a href="{{ url_for('clients') }}">Abrir módulo</a>
+    </div>
+    <div class="card">
+        <h2>Módulo 2: Registro de ventas</h2>
+        <p>Disponible para administradores y vendedores.</p>
+        <a href="{{ url_for('sales') }}">Abrir módulo</a>
+    </div>
+    {% if rol == "administrador" %}
+        <div class="card">
+            <h2>Módulo 3: Gestión de usuarios</h2>
+            <p>Disponible solo para administradores.</p>
+            <a href="{{ url_for('module_placeholder', module_id=3) }}">Abrir módulo</a>
+        </div>
+    {% endif %}
+{% endblock %}

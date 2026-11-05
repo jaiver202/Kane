@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de clientes | Kane{% endblock %}
+
+{% block content %}
+    <h1>Gestión de clientes</h1>
+    <p><a href="{{ url_for('dashboard') }}">Volver al menú</a></p>
+
+    <section class="card">
+        <h2>Registrar cliente</h2>
+        <form method="post" action="{{ url_for('create_client') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-grid">
+                <div>
+                    <label for="nombre">Nombre *</label>
+                    <input id="nombre" name="nombre" maxlength="100" required>
+                </div>
+                <div>
+                    <label for="pais">País / nacionalidad *</label>
+                    <input id="pais" name="pais" maxlength="50" required>
+                </div>
+                <div>
+                    <label for="email">Correo</label>
+                    <input id="email" name="email" type="email" maxlength="100">
+                </div>
+                <div>
+                    <label for="telefono">Teléfono</label>
+                    <input id="telefono" name="telefono" maxlength="20">
+                </div>
+                <div>
+                    <label for="ciudad">Ciudad</label>
+                    <input id="ciudad" name="ciudad" maxlength="50">
+                </div>
+                <div>
+                    <label for="direccion">Dirección</label>
+                    <input id="direccion" name="direccion" maxlength="150">
+                </div>
+            </div>
+            <p><button type="submit">Guardar cliente</button></p>
+        </form>
+    </section>
+
+    <section>
+        <h2>Clientes registrados</h2>
+        <p><a href="{{ url_for('client_report') }}">Ver reporte por país</a></p>
+        {% if clientes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Ciudad</th>
+                        <th>País</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                        <tr>
+                            <td>{{ cliente.nombre }}</td>
+                            <td>{{ cliente.email or "—" }}</td>
+                            <td>{{ cliente.telefono or "—" }}</td>
+                            <td>{{ cliente.ciudad or "—" }}</td>
+                            <td>{{ cliente.pais }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_client', client_id=cliente.id_cliente) }}">Editar</a>
+                                <form method="post" action="{{ url_for('delete_client', client_id=cliente.id_cliente) }}"
+                                      onsubmit="return confirm('¿Eliminar este cliente?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aún no hay clientes registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}

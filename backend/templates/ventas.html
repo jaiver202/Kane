@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de ventas | Kane{% endblock %}
+
+{% block content %}
+    <h1>Registro de ventas</h1>
+    <p>
+        <a href="{{ url_for('products') }}">Administrar productos y stock</a> |
+        <a href="{{ url_for('dashboard') }}">Menú principal</a>
+    </p>
+
+    <section class="card">
+        <h2>Nueva venta</h2>
+        {% if not clientes %}
+            <p>Registra un cliente antes de crear una venta.</p>
+        {% elif not productos %}
+            <p>Registra un producto y sus existencias antes de crear una venta.</p>
+        {% else %}
+            <form method="post" action="{{ url_for('create_sale') }}" id="sale-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="id_cliente">Cliente *</label>
+                <select id="id_cliente" name="id_cliente" required>
+                    <option value="">Selecciona un cliente</option>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id_cliente }}">
+                            {{ cliente.nombre }}{% if cliente.email %} — {{ cliente.email }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <h3>Productos</h3>
+                <div id="sale-items">
+                    <div class="sale-item form-grid">
+                        <div>
+                            <label>Producto *</label>
+                            <select name="id_producto" required>
+                                <option value="">Selecciona un producto</option>
+                                {% for producto in productos %}
+                                    <option value="{{ producto.id_producto }}"
+                                            {% if producto.cantidad_disponible <= 0 or producto.registros_stock != 1 %}disabled{% endif %}>
+                                        {{ producto.nombre_producto }} — ${{ "%.2f"|format(producto.precio) }}
+                                        (stock: {{ producto.cantidad_disponible }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Cantidad *</label>
+                            <input name="cantidad" type="number" min="1" step="1" value="1" required>
+                        </div>
+                        <div>
+                            <button type="button" class="remove-item" onclick="removeItem(this)" hidden>
+                                Quitar producto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <p><button type="button" onclick="addItem()">Agregar otro producto</button></p>
+                <p><button type="submit">Registrar venta y generar factura</button></p>
+            </form>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2>Ventas recientes</h2>
+        {% if ventas %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Venta</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Factura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                        <tr>
+                            <td>#{{ venta.id_venta }}</td>
+                            <td>{{ venta.fecha_venta }}</td>
+                            <td>{{ venta.cliente }}</td>
+                            <td>${{ "%.2f"|format(venta.total) }}</td>
+                            <td>
+                                {% if venta.id_factura %}
+                                    <a href="{{ url_for('invoice', invoice_id=venta.id_factura) }}">
+                                        {{ venta.numero_factura }}
+                                    </a>
+                                {% else %}
+                                    Sin factura
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aún no hay ventas.</p>
+        {% endif %}
+    </section>
+
+    <script>
+        function addItem() {
+            const container = document.getElementById("sale-items");
+            const row = container.querySelector(".sale-item").cloneNode(true);
+            row.querySelector("select").selectedIndex = 0;
+            row.querySelector("input[name='cantidad']").value = 1;
+            row.querySelector(".remove-item").hidden = false;
+            container.appendChild(row);
+        }
+
+        function removeItem(button) {
+            button.closest(".sale-item").remove();
+        }
+    </script>
+{% endblock %}

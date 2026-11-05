@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Productos y stock | Kane{% endblock %}
+
+{% block content %}
+    <h1>Productos y existencias</h1>
+    <p>
+        <a href="{{ url_for('sales') }}">Volver a ventas</a> |
+        <a href="{{ url_for('dashboard') }}">Menú principal</a>
+    </p>
+
+    <section class="card">
+        <h2>Registrar producto</h2>
+        <form method="post" action="{{ url_for('create_product') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-grid">
+                <div>
+                    <label for="nombre_producto">Nombre *</label>
+                    <input id="nombre_producto" name="nombre_producto" maxlength="100" required>
+                </div>
+                <div>
+                    <label for="precio">Precio *</label>
+                    <input id="precio" name="precio" type="number" min="0" max="99999999.99"
+                           step="0.01" required>
+                </div>
+                <div>
+                    <label for="cantidad_disponible">Existencia inicial *</label>
+                    <input id="cantidad_disponible" name="cantidad_disponible" type="number"
+                           min="0" step="1" value="0" required>
+                </div>
+                <div>
+                    <label for="descripcion">Descripción</label>
+                    <input id="descripcion" name="descripcion">
+                </div>
+            </div>
+            <p><button type="submit">Guardar producto</button></p>
+        </form>
+    </section>
+
+    <section>
+        <h2>Inventario</h2>
+        {% if productos %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Existencias</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                        <tr>
+                            <td>{{ producto.nombre_producto }}</td>
+                            <td>${{ "%.2f"|format(producto.precio) }}</td>
+                            <td>
+                                {{ producto.cantidad_disponible }}
+                                {% if producto.registros_stock != 1 %}
+                                    <span class="error">(revisar registros de stock)</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit_product', product_id=producto.id_producto) }}">Editar</a>
+                                {% if producto.registros_stock == 1 %}
+                                    <form method="post"
+                                          action="{{ url_for('add_stock', product_id=producto.id_producto) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <label for="cantidad-{{ producto.id_producto }}">Agregar unidades</label>
+                                        <input id="cantidad-{{ producto.id_producto }}" name="cantidad"
+                                               type="number" min="1" step="1" required>
+                                        <button type="submit">Agregar stock</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hay productos registrados.</p>
+        {% endif %}
+    </section>
+{% endblock %}
