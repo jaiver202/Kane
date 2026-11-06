@@ -2,145 +2,318 @@
 
 {% block title %}Menú principal | Kane{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <style>
+        .dashboard-page {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .dashboard-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .dashboard-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .dashboard-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .dashboard-card {
+            min-width: 0;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .metric-card {
+            padding: 1rem;
+        }
+
+        .metric-icon {
+            display: inline-flex;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            font-size: 1.15rem;
+        }
+
+        .metric-label {
+            margin-bottom: .15rem;
+            color: #806b75;
+            font-size: .78rem;
+        }
+
+        .metric-value {
+            margin-bottom: .1rem;
+            color: #2a121d;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .metric-note {
+            color: #987f89;
+            font-size: .72rem;
+        }
+
+        .dashboard-section-heading {
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .dashboard-section-title {
+            margin: 0;
+            color: #35202a;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+
+        .dashboard-section-caption {
+            margin-top: .18rem;
+            color: #967f89;
+            font-size: .72rem;
+        }
+
+        .dashboard-table {
+            width: 100%;
+            margin: 0;
+            color: #725d67;
+            font-size: .77rem;
+            white-space: nowrap;
+        }
+
+        .dashboard-table thead th {
+            padding: .72rem 1rem;
+            border-bottom: 1px solid #f0e5e9;
+            background: #fdfafb;
+            color: #8d7580;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .dashboard-table tbody td {
+            padding: .75rem 1rem;
+            border-bottom: 1px solid #f2e8ec;
+            vertical-align: middle;
+        }
+
+        .dashboard-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .dashboard-table tbody tr:hover {
+            background: #fdfafb;
+        }
+
+        .dashboard-sale-link {
+            color: #a83e69;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .dashboard-sale-link:hover {
+            color: #8d2f58;
+            text-decoration: underline;
+        }
+
+        .stock-alert {
+            padding: .8rem;
+            border-radius: 14px;
+            background: #fdf6f0;
+        }
+
+        .stock-alert + .stock-alert {
+            margin-top: .65rem;
+        }
+
+        .stock-alert-icon {
+            display: inline-flex;
+            width: 38px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 11px;
+            background: #fbe6d4;
+            color: #d96b27;
+        }
+
+        .stock-alert-name {
+            color: #35202a;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+
+        .stock-alert-id {
+            color: #967f89;
+            font-size: .68rem;
+        }
+
+        .stock-alert-quantity {
+            color: #c65e24;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<!-- Saludo y Botón + Nueva venta -->
-<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
-    <div>
-        <div class="text-uppercase fw-bold mb-1" style="color: #B23A68; font-size: 0.7rem; letter-spacing: 1px;">Panel General</div>
-        <h1 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif; color: #2A121D; font-size: 2.3rem;">Buen día, {{ nombre_usuario }}</h1>
-        <p class="text-muted mb-0" style="font-size: 0.9rem;">Esto es lo que está pasando hoy en tu postrería.</p>
+<div class="dashboard-page">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
+        <div>
+            <div class="dashboard-eyebrow">Panel general</div>
+            <h1 class="dashboard-title">Buen día, {{ nombre_usuario }}</h1>
+            <p class="dashboard-description">Esto es lo que está pasando hoy en tu postrería.</p>
+        </div>
+        <a href="{{ url_for('sales') }}" class="btn text-white rounded-3 px-4 py-2 fw-semibold shadow-sm"
+           style="background-color: #9e335c;">
+            <i class="bi bi-plus-lg me-1"></i> Nueva venta
+        </a>
     </div>
-    <a href="{{ url_for('sales') }}" class="btn text-white rounded-3 px-4 py-2 fw-semibold shadow-sm" style="background-color: #9E335C;">
-        <i class="bi bi-plus-lg me-1"></i> Nueva venta
-    </a>
-</div>
 
-<!-- 4 Tarjetas de Métricas (KPIs) -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-            <div class="card-body p-1">
-                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #FCEEF2; color: #B23A68;">
-                    <i class="bi bi-cash fs-5"></i>
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <section class="dashboard-card metric-card h-100">
+                <div class="metric-icon" style="background: #fceef2; color: #b23a68;">
+                    <i class="bi bi-cash"></i>
                 </div>
-                <div class="text-muted small mb-1">Ventas de hoy</div>
-                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">$ 173.740</div>
-                <div class="text-muted" style="font-size: 0.78rem;">2 transacciones</div>
-            </div>
+                <div class="metric-label">Ventas de hoy</div>
+                <div class="metric-value">{{ ventas_hoy_display }}</div>
+                <div class="metric-note">{{ transacciones_hoy }} transacciones</div>
+            </section>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <section class="dashboard-card metric-card h-100">
+                <div class="metric-icon" style="background: #f3eef8; color: #7e57c2;">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="metric-label">Clientes registrados</div>
+                <div class="metric-value">{{ total_clientes }}</div>
+                <div class="metric-note">En tu base de clientes</div>
+            </section>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <section class="dashboard-card metric-card h-100">
+                <div class="metric-icon" style="background: #fdf6ec; color: #b57a21;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="metric-label">Ventas del mes</div>
+                <div class="metric-value">{{ ventas_mes_display }}</div>
+                <div class="metric-note">Acumulado mensual</div>
+            </section>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <section class="dashboard-card metric-card h-100">
+                <div class="metric-icon" style="background: #edf5fa; color: #3b82f6;">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="metric-label">Stock bajo</div>
+                <div class="metric-value">{{ total_stock_bajo }}</div>
+                <div class="metric-note">Productos por reponer</div>
+            </section>
         </div>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-            <div class="card-body p-1">
-                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #F3EEF8; color: #7E57C2;">
-                    <i class="bi bi-people fs-5"></i>
-                </div>
-                <div class="text-muted small mb-1">Clientes activos</div>
-                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">5</div>
-                <div class="text-muted" style="font-size: 0.78rem;">1 clientes VIP</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-            <div class="card-body p-1">
-                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #FDF6EC; color: #D9822B;">
-                    <i class="bi bi-graph-up-arrow fs-5"></i>
-                </div>
-                <div class="text-muted small mb-1">Ventas del mes</div>
-                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">$ 173.740</div>
-                <div class="text-muted" style="font-size: 0.78rem;">Acumulado mensual</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-            <div class="card-body p-1">
-                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #EDF5FA; color: #3B82F6;">
-                    <i class="bi bi-box-seam fs-5"></i>
-                </div>
-                <div class="text-muted small mb-1">Stock bajo</div>
-                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">1</div>
-                <div class="text-muted" style="font-size: 0.78rem;">Productos por reponer</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Fila Inferior: Ventas Recientes y Alertas de Inventario -->
-<div class="row g-3">
-    <div class="col-12 col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            <section class="dashboard-card h-100 overflow-hidden">
+                <div class="dashboard-section-heading d-flex justify-content-between align-items-center gap-3">
                     <div>
-                        <h6 class="fw-bold mb-0" style="color: #2A121D;">Ventas recientes</h6>
-                        <small class="text-muted" style="font-size: 0.78rem;">Últimos movimientos del punto de venta</small>
+                        <h2 class="dashboard-section-title">Ventas recientes</h2>
+                        <div class="dashboard-section-caption">Últimos movimientos del punto de venta</div>
                     </div>
-                    <a href="{{ url_for('sales') }}" class="text-decoration-none small fw-semibold" style="color: #9E335C;">
+                    <a href="{{ url_for('invoices') }}" class="text-decoration-none small fw-semibold flex-shrink-0"
+                       style="color: #a83e69;">
                         Ver facturas <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
-
                 <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                            <tr class="border-bottom">
-                                <th class="py-3 border-0 fw-semibold">Venta</th>
-                                <th class="py-3 border-0 fw-semibold">Cliente</th>
-                                <th class="py-3 border-0 fw-semibold">Fecha</th>
-                                <th class="py-3 border-0 fw-semibold">Pago</th>
-                                <th class="py-3 border-0 fw-semibold text-end">Total</th>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Venta</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Total</th>
                             </tr>
                         </thead>
-                        <tbody style="font-size: 0.88rem;">
-                            <tr class="border-bottom">
-                                <td class="py-3 fw-bold" style="color: #2A121D;">V-3907786265</td>
-                                <td class="py-3 text-secondary">Laura Martínez</td>
-                                <td class="py-3 text-muted">05 de nov de 2026</td>
-                                <td class="py-3">
-                                    <span class="badge rounded-pill fw-medium px-3 py-1" style="background-color: #F4EFEA; color: #5C4B51;">Efectivo</span>
-                                </td>
-                                <td class="py-3 text-end fw-bold" style="color: #2A121D;">$ 61.880</td>
-                            </tr>
+                        <tbody>
+                            {% for venta in ventas_recientes %}
                             <tr>
-                                <td class="py-3 fw-bold border-0" style="color: #2A121D;">V-3904244919</td>
-                                <td class="py-3 text-secondary border-0">Thomas Miller</td>
-                                <td class="py-3 text-muted border-0">05 de nov de 2026</td>
-                                <td class="py-3 border-0">
-                                    <span class="badge rounded-pill fw-medium px-3 py-1" style="background-color: #F4EFEA; color: #5C4B51;">Transferencia</span>
+                                <td>
+                                    {% if venta.id_factura %}
+                                    <a class="dashboard-sale-link"
+                                       href="{{ url_for('invoice', invoice_id=venta.id_factura) }}">
+                                        {{ venta.numero_factura }}
+                                    </a>
+                                    {% else %}
+                                    <span class="fw-bold" style="color: #35202a;">Venta #{{ venta.id_venta }}</span>
+                                    {% endif %}
                                 </td>
-                                <td class="py-3 text-end fw-bold border-0" style="color: #2A121D;">$ 111.860</td>
+                                <td>{{ venta.cliente }}</td>
+                                <td>{{ venta.fecha_display }}</td>
+                                <td class="text-end fw-bold" style="color: #35202a;">{{ venta.total_display }}</td>
                             </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-muted">Todavía no hay ventas registradas.</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
 
-    <div class="col-12 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-body p-4">
-                <h6 class="fw-bold mb-0" style="color: #2A121D;">Alertas de inventario</h6>
-                <small class="text-muted d-block mb-3" style="font-size: 0.78rem;">Productos próximos a agotarse</small>
-
-                <div class="rounded-4 p-3 d-flex align-items-center justify-content-between" style="background-color: #FDF6F0;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #FBE6D4; color: #D96B27;">
-                            <i class="bi bi-exclamation-triangle"></i>
-                        </div>
-                        <div>
-                            <div class="fw-bold small" style="color: #2A121D;">Caja de macarons x6</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">GAL-MA-004</div>
-                        </div>
-                    </div>
-                    <span class="fw-bold small" style="color: #D96B27;">1 u.</span>
+        <div class="col-12 col-xl-4">
+            <section class="dashboard-card h-100 overflow-hidden">
+                <div class="dashboard-section-heading">
+                    <h2 class="dashboard-section-title">Alertas de inventario</h2>
+                    <div class="dashboard-section-caption">Productos con 3 unidades o menos</div>
                 </div>
-            </div>
+                <div class="p-3">
+                    {% for producto in alertas_stock %}
+                    <a href="{{ url_for('products') }}" class="stock-alert d-flex align-items-center justify-content-between gap-2 text-decoration-none">
+                        <span class="d-flex align-items-center gap-2 overflow-hidden">
+                            <span class="stock-alert-icon"><i class="bi bi-exclamation-triangle"></i></span>
+                            <span class="text-truncate">
+                                <span class="stock-alert-name d-block text-truncate">{{ producto.nombre_producto }}</span>
+                                <span class="stock-alert-id d-block">Producto #{{ producto.id_producto }}</span>
+                            </span>
+                        </span>
+                        <span class="stock-alert-quantity">{{ producto.cantidad_disponible }} u.</span>
+                    </a>
+                    {% else %}
+                    <div class="py-4 text-center">
+                        <i class="bi bi-check-circle fs-4" style="color: #43856b;"></i>
+                        <p class="mb-0 mt-2 text-muted small">No hay productos con stock bajo.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
         </div>
     </div>
 </div>

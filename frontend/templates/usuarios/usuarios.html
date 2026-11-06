@@ -2,84 +2,581 @@
 
 {% block title %}Gestión de usuarios | Kane{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <style>
+        .users-page {
+            max-width: 1440px;
+            min-width: 0;
+            margin: 0 auto;
+        }
+
+        .users-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .users-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .users-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .users-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: .65rem 1.15rem;
+            border: 1px solid #b85a7a;
+            border-radius: 11px;
+            background: #b85a7a;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 700;
+            box-shadow: 0 6px 14px rgba(111, 35, 67, .18);
+            transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+        }
+
+        .users-page .users-btn-primary {
+            align-self: flex-start;
+        }
+
+        @media (min-width: 992px) {
+            .users-page .users-btn-primary {
+                align-self: flex-end;
+            }
+        }
+
+        .users-btn-primary:hover,
+        .users-btn-primary:focus {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .users-btn-secondary {
+            border: 1px solid #ead8df;
+            border-radius: 11px;
+            background: #fff;
+            color: #5b404b;
+            font-size: .85rem;
+            font-weight: 700;
+        }
+
+        .users-btn-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .users-card {
+            overflow: hidden;
+            min-width: 0;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .users-table {
+            margin: 0;
+            color: #725d67;
+            font-size: .8rem;
+        }
+
+        .users-table thead th {
+            padding: .9rem 1.25rem;
+            border-bottom: 1px solid #f0e5e9;
+            background: #fdfafb;
+            color: #8d7580;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .users-table tbody td {
+            padding: .85rem 1.25rem;
+            border-bottom: 1px solid #f2e8ec;
+            vertical-align: middle;
+        }
+
+        .users-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .users-table tbody tr:hover {
+            background: #fdfafb;
+        }
+
+        .users-col-user {
+            width: 28%;
+        }
+
+        .users-col-email {
+            width: 30%;
+        }
+
+        .users-col-role {
+            width: 19%;
+        }
+
+        .users-col-status {
+            width: 13%;
+        }
+
+        .user-avatar {
+            display: inline-flex;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: #f5e1e8;
+            color: #9c4265;
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+        .user-name {
+            color: #35202a;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .user-email {
+            color: #8b7480;
+            white-space: nowrap;
+        }
+
+        .role-badge {
+            padding: .45rem .7rem;
+            font-size: .7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .role-admin {
+            background: #f7dfe8;
+            color: #9e335c;
+        }
+
+        .role-seller {
+            background: #e7f2ed;
+            color: #2f6b55;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-active {
+            color: #1f8a5b;
+        }
+
+        .status-inactive {
+            color: #8d7580;
+        }
+
+        .users-icon-btn {
+            display: inline-flex;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #8d7580;
+            font-size: .9rem;
+        }
+
+        .users-icon-btn:hover {
+            background: #f8edf1;
+            color: #a83e69;
+        }
+
+        .users-icon-btn-danger:hover {
+            background: #fff0f0;
+            color: #bd3b4b;
+        }
+
+        .users-empty {
+            padding: 2.5rem 1rem !important;
+            color: #947e88;
+            text-align: center;
+        }
+
+        .users-modal {
+            border: 1px solid #eddee4;
+            border-radius: 18px;
+            box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
+        }
+
+        .users-modal .modal-header,
+        .users-modal .modal-footer {
+            border-color: #f0e5e9;
+            padding: 1.15rem 1.4rem;
+        }
+
+        .users-modal .modal-body {
+            padding: 1.25rem 1.4rem;
+        }
+
+        .users-modal .modal-title {
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .users-modal-eyebrow {
+            margin-bottom: .25rem;
+            color: #a53d68;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .users-edit-dialog {
+            max-width: 560px;
+        }
+
+        .users-modal .form-check-label {
+            color: #624b56;
+            font-size: .82rem;
+            font-weight: 600;
+        }
+
+        .users-modal .form-check-input {
+            border-color: #cb8da6;
+            cursor: pointer;
+        }
+
+        .users-modal .form-check-input:checked {
+            border-color: #b85a7a;
+            background-color: #b85a7a;
+        }
+
+        .users-modal .form-check-input:focus {
+            border-color: #cb8da6;
+            box-shadow: 0 0 0 3px rgba(216, 108, 144, .12);
+        }
+
+        .modal-backdrop.show {
+            opacity: .5;
+            backdrop-filter: blur(2px);
+        }
+
+        .users-modal-subtitle {
+            margin-top: .2rem;
+            color: #8a747e;
+            font-size: .8rem;
+        }
+
+        .users-modal .form-label {
+            margin-bottom: .35rem;
+            color: #624b56;
+            font-size: .76rem;
+            font-weight: 700;
+        }
+
+        .users-modal .form-control,
+        .users-modal .form-select {
+            border-color: #e8dbe0;
+            border-radius: 9px;
+            background-color: #fdfafb;
+            color: #39232d;
+            font-size: .82rem;
+            padding: .62rem .7rem;
+        }
+
+        .users-modal .form-control:focus,
+        .users-modal .form-select:focus {
+            border-color: #cb8da6;
+            box-shadow: 0 0 0 3px rgba(216, 108, 144, .12);
+        }
+
+        .users-modal .form-text {
+            color: #9c858f;
+            font-size: .72rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .users-table thead th,
+            .users-table tbody td {
+                padding-right: .9rem;
+                padding-left: .9rem;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <h1>Gestión de usuarios</h1>
-    <p><a href="{{ url_for('dashboard') }}">Volver al menú</a></p>
-
-    <section class="card">
-        <h2>Registrar usuario</h2>
-        <form method="post" action="{{ url_for('create_user') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="form-grid">
-                <div>
-                    <label for="nombre_usuario">Nombre *</label>
-                    <input id="nombre_usuario" name="nombre_usuario" maxlength="50" required>
-                </div>
-                <div>
-                    <label for="email">Correo *</label>
-                    <input id="email" name="email" type="email" maxlength="100" required>
-                </div>
-                <div>
-                    <label for="contrasena">Contraseña (mínimo 8 caracteres) *</label>
-                    <input id="contrasena" name="contrasena" type="password" minlength="8"
-                           autocomplete="new-password" required>
-                </div>
-                <div>
-                    <label for="rol">Rol *</label>
-                    <select id="rol" name="rol" required>
-                        <option value="vendedor">Vendedor</option>
-                        <option value="administrador">Administrador</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="estado">Estado *</label>
-                    <select id="estado" name="estado" required>
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                    </select>
-                </div>
+    <div class="users-page">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+            <div>
+                <div class="users-eyebrow">Módulo 3</div>
+                <h1 class="users-title">Gestión de usuarios</h1>
+                <p class="users-description">Administra accesos y permisos de administradores y vendedores.</p>
             </div>
-            <p><button type="submit">Guardar usuario</button></p>
-        </form>
-    </section>
+            <button type="button" class="btn users-btn-primary" data-bs-toggle="modal" data-bs-target="#newUserModal">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo usuario
+            </button>
+        </div>
 
-    <section>
-        <h2>Usuarios registrados</h2>
-        {% if usuarios %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios %}
+        <section class="card users-card border-0" aria-label="Usuarios registrados">
+            <div class="table-responsive">
+                <table class="table users-table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <td>{{ usuario.nombre_usuario }}</td>
-                            <td>{{ usuario.email }}</td>
-                            <td>{{ usuario.rol }}</td>
-                            <td>{{ usuario.estado }}</td>
-                            <td>
-                                <a href="{{ url_for('edit_user', user_id=usuario.id_usuario) }}">
-                                    Editar
-                                </a>
-                                <form method="post"
-                                      action="{{ url_for('delete_user', user_id=usuario.id_usuario) }}"
-                                      onsubmit="return confirm('¿Eliminar este usuario?');">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit">Eliminar</button>
-                                </form>
-                            </td>
+                            <th scope="col" class="users-col-user">Usuario</th>
+                            <th scope="col" class="users-col-email">Correo</th>
+                            <th scope="col" class="users-col-role">Rol</th>
+                            <th scope="col" class="users-col-status">Estado</th>
+                            <th scope="col" class="text-end">Acciones</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Aún no hay usuarios registrados.</p>
-        {% endif %}
-    </section>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="user-avatar" aria-hidden="true">{{ usuario.nombre_usuario.split()[:2]|map('first')|join|upper }}</span>
+                                        <span class="user-name">{{ usuario.nombre_usuario }}</span>
+                                    </div>
+                                </td>
+                                <td class="user-email">{{ usuario.email }}</td>
+                                <td>
+                                    {% if usuario.rol == "administrador" %}
+                                        <span class="badge rounded-pill role-badge role-admin">Administrador</span>
+                                    {% else %}
+                                        <span class="badge rounded-pill role-badge role-seller">Vendedor</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="status-pill {% if usuario.estado == 'activo' %}status-active{% else %}status-inactive{% endif %}">
+                                        <span class="status-dot" aria-hidden="true"></span>
+                                        {{ usuario.estado|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a href="{{ url_for('edit_user', user_id=usuario.id_usuario) }}"
+                                           class="btn users-icon-btn"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#editUserModal"
+                                           data-edit-url="{{ url_for('edit_user', user_id=usuario.id_usuario) }}"
+                                           data-user-name="{{ usuario.nombre_usuario }}"
+                                           data-user-email="{{ usuario.email }}"
+                                           data-user-role="{{ usuario.rol }}"
+                                           data-user-state="{{ usuario.estado }}"
+                                           title="Editar {{ usuario.nombre_usuario }}"
+                                           aria-label="Editar {{ usuario.nombre_usuario }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form method="post"
+                                              action="{{ url_for('delete_user', user_id=usuario.id_usuario) }}"
+                                              class="d-inline m-0"
+                                              onsubmit="return confirm('¿Eliminar este usuario?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit"
+                                                    class="btn users-icon-btn users-icon-btn-danger"
+                                                    title="Eliminar {{ usuario.nombre_usuario }}"
+                                                    aria-label="Eliminar {{ usuario.nombre_usuario }}">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="users-empty">
+                                    <i class="bi bi-people d-block fs-4 mb-2" aria-hidden="true"></i>
+                                    Aún no hay usuarios registrados.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="newUserModal" tabindex="-1" aria-labelledby="newUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content users-modal">
+                <form method="post" action="{{ url_for('create_user') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="users-modal-eyebrow">Acceso al sistema</div>
+                            <h2 class="modal-title" id="newUserModalLabel">Nuevo usuario</h2>
+                            <p class="users-modal-subtitle mb-0">Completa los datos para crear una cuenta.</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="nombre_usuario" class="form-label">Nombre *</label>
+                                <input id="nombre_usuario" name="nombre_usuario" type="text"
+                                       class="form-control" maxlength="50" required autofocus>
+                            </div>
+                            <div class="col-12">
+                                <label for="email" class="form-label">Correo *</label>
+                                <input id="email" name="email" type="email"
+                                       class="form-control" maxlength="100" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="contrasena" class="form-label">Contraseña *</label>
+                                <input id="contrasena" name="contrasena" type="password"
+                                       class="form-control" minlength="8"
+                                       autocomplete="new-password" required>
+                                <div class="form-text">Mínimo 8 caracteres.</div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="rol" class="form-label">Rol *</label>
+                                <select id="rol" name="rol" class="form-select" required>
+                                    <option value="vendedor">Vendedor</option>
+                                    <option value="administrador">Administrador</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="estado" class="form-label">Estado *</label>
+                                <select id="estado" name="estado" class="form-select" required>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn users-btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn users-btn-primary">Guardar usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog users-edit-dialog modal-dialog-centered">
+            <div class="modal-content users-modal">
+                <form method="post" id="edit-user-form" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="estado" id="edit-estado-value" value="activo">
+                    <div class="modal-header">
+                        <div>
+                            <div class="users-modal-eyebrow">Acceso al sistema</div>
+                            <h2 class="modal-title" id="editUserModalLabel">Editar usuario</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="edit-nombre_usuario" class="form-label">Nombre completo *</label>
+                                <input id="edit-nombre_usuario" name="nombre_usuario" type="text"
+                                       class="form-control" maxlength="50" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="edit-email" class="form-label">Correo *</label>
+                                <input id="edit-email" name="email" type="email"
+                                       class="form-control" maxlength="100" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="edit-rol" class="form-label">Rol</label>
+                                <select id="edit-rol" name="rol" class="form-select" required>
+                                    <option value="vendedor">Vendedor</option>
+                                    <option value="administrador">Administrador</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="edit-contrasena" class="form-label">Nueva contraseña (opcional)</label>
+                                <input id="edit-contrasena" name="contrasena" type="password"
+                                       class="form-control" minlength="8"
+                                       autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit-cuenta-activa">
+                                    <label class="form-check-label" for="edit-cuenta-activa">Cuenta activa</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn users-btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn users-btn-primary">Guardar usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const modal = document.getElementById('editUserModal');
+            const form = document.getElementById('edit-user-form');
+            if (!modal || !form) return;
+
+            const nameField = document.getElementById('edit-nombre_usuario');
+            const emailField = document.getElementById('edit-email');
+            const roleField = document.getElementById('edit-rol');
+            const passwordField = document.getElementById('edit-contrasena');
+            const activeField = document.getElementById('edit-cuenta-activa');
+            const stateField = document.getElementById('edit-estado-value');
+
+            const syncState = () => {
+                stateField.value = activeField.checked ? 'activo' : 'inactivo';
+            };
+
+            modal.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) return;
+
+                form.reset();
+                form.action = trigger.getAttribute('data-edit-url') || '';
+                nameField.value = trigger.getAttribute('data-user-name') || '';
+                emailField.value = trigger.getAttribute('data-user-email') || '';
+                roleField.value = trigger.getAttribute('data-user-role') || 'vendedor';
+                passwordField.value = '';
+                activeField.checked = trigger.getAttribute('data-user-state') === 'activo';
+                syncState();
+            });
+
+            activeField.addEventListener('change', syncState);
+            form.addEventListener('submit', syncState);
+        })();
+    </script>
 {% endblock %}

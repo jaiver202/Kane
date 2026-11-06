@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}Facturas | Kane{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .invoices-page {
+            max-width: 1440px;
+            min-width: 0;
+            margin: 0 auto;
+        }
+
+        .invoices-heading {
+            margin-bottom: 1.4rem;
+        }
+
+        .invoices-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .invoices-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .invoices-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .invoices-card {
+            overflow: hidden;
+            min-width: 0;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .invoices-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            color: #725d67;
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+
+        .invoices-table thead th {
+            padding: .82rem 1.15rem;
+            border-bottom: 1px solid #f0e5e9;
+            background: #fdfafb;
+            color: #8d7580;
+            font-size: .63rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .invoices-table tbody td {
+            height: 61px;
+            padding: .65rem 1.15rem;
+            border-bottom: 1px solid #f2e8ec;
+            vertical-align: middle;
+        }
+
+        .invoices-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .invoices-table tbody tr:hover {
+            background: #fdfafb;
+        }
+
+        .invoice-number-btn {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #a83e69;
+            font-size: .78rem;
+            font-weight: 700;
+            text-align: left;
+            text-decoration: none;
+        }
+
+        .invoice-number-btn:hover {
+            color: #8d2f58;
+            text-decoration: underline;
+        }
+
+        .invoice-client-name {
+            color: #35202a;
+            font-weight: 700;
+        }
+
+        .invoice-client-contact {
+            margin-top: .12rem;
+            color: #967f89;
+            font-size: .69rem;
+        }
+
+        .payment-pill {
+            display: inline-flex;
+            padding: .34rem .62rem;
+            border-radius: 999px;
+            background: #f4eef0;
+            color: #6f5b65;
+            font-size: .68rem;
+            font-weight: 600;
+        }
+
+        .invoice-total-cell {
+            color: #2a121d;
+            font-weight: 700;
+        }
+
+        .invoice-action {
+            display: inline-flex;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #947d87;
+            font-size: .92rem;
+            text-decoration: none;
+        }
+
+        .invoice-action:hover {
+            background: #f8edf1;
+            color: #a83e69;
+        }
+
+        .invoices-empty {
+            padding: 2.5rem 1rem !important;
+            color: #947e88;
+            text-align: center;
+        }
+
+        .invoice-modal-dialog {
+            max-width: 760px;
+        }
+
+        .invoice-modal {
+            overflow: hidden;
+            border: 1px solid #eddee4;
+            border-radius: 18px;
+            box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
+        }
+
+        .invoice-modal .modal-header {
+            align-items: flex-start;
+            padding: 1.05rem 1.4rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .invoice-modal-eyebrow {
+            margin-bottom: .2rem;
+            color: #a53d68;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .invoice-modal .modal-title {
+            margin: 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .invoice-modal .modal-body {
+            padding: 1.15rem 1.4rem;
+            background: #fff;
+        }
+
+        .invoice-modal .modal-footer {
+            padding: .9rem 1.4rem;
+            border-top: 1px solid #f0e5e9;
+            background: #fdf9fa;
+        }
+
+        .invoice-sheet-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .invoice-brand {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .invoice-brand-icon {
+            display: inline-flex;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #d86c90;
+            color: #fff;
+            font-size: 1.15rem;
+        }
+
+        .invoice-brand-name {
+            color: #a83e69;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .invoice-brand-tagline {
+            margin-top: .15rem;
+            color: #8a747e;
+            font-size: .69rem;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta-label {
+            color: #a53d68;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .invoice-meta-number {
+            margin-top: .18rem;
+            color: #2a121d;
+            font-size: 1.08rem;
+            font-weight: 700;
+        }
+
+        .invoice-meta-date {
+            margin-top: .12rem;
+            color: #7d6671;
+            font-size: .76rem;
+        }
+
+        .invoice-divider {
+            margin: .95rem 0 1rem;
+            border-color: #eddee4;
+            opacity: 1;
+        }
+
+        .invoice-parties {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .invoice-label {
+            color: #a53d68;
+            font-size: .61rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .invoice-client,
+        .invoice-seller {
+            margin-top: .2rem;
+            color: #2a121d;
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .invoice-contact {
+            margin-top: .1rem;
+            color: #8a747e;
+            font-size: .74rem;
+        }
+
+        .invoice-parties-right {
+            text-align: right;
+        }
+
+        .invoice-table-wrap {
+            margin-top: 1.05rem;
+        }
+
+        .invoice-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            font-size: .77rem;
+        }
+
+        .invoice-table thead th {
+            padding: .52rem .6rem;
+            border: 0;
+            background: #f9e9ef;
+            color: #a53d68;
+            font-size: .6rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .invoice-table tbody td {
+            padding: .62rem .6rem;
+            border-bottom: 1px solid #f2e8ec;
+            color: #725d67;
+            vertical-align: middle;
+        }
+
+        .invoice-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .invoice-table th:not(:first-child),
+        .invoice-table td:not(:first-child) {
+            text-align: right;
+        }
+
+        .invoice-items-empty {
+            color: #947e88 !important;
+            text-align: center !important;
+        }
+
+        .invoice-totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: .65rem;
+        }
+
+        .invoice-totals-box {
+            width: min(100%, 260px);
+        }
+
+        .invoice-total-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .28rem 0;
+            color: #7d6671;
+            font-size: .8rem;
+        }
+
+        .invoice-total-row span:last-child {
+            color: #2a121d;
+            font-weight: 600;
+        }
+
+        .invoice-total-final {
+            margin-top: .3rem;
+            padding-top: .62rem;
+            border-top: 1px solid #eddee4;
+            color: #2a121d;
+            font-size: .92rem;
+            font-weight: 700;
+        }
+
+        .invoice-total-final span:last-child {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .invoice-thanks {
+            margin: 1.5rem 0 .2rem;
+            color: #9c858f;
+            font-size: .74rem;
+            text-align: center;
+        }
+
+        .invoice-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+            border-radius: 11px;
+            font-size: .84rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .invoice-button-secondary {
+            border: 1px solid #ead8df;
+            background: #fff;
+            color: #5b404b;
+        }
+
+        .invoice-button-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .invoice-button-primary {
+            border: 1px solid #b85a7a;
+            background: #b85a7a;
+            color: #fff;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .invoice-button-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        .modal-backdrop.show {
+            opacity: .5;
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 767.98px) {
+            .invoice-sheet-header,
+            .invoice-parties {
+                flex-direction: column;
+            }
+
+            .invoice-meta,
+            .invoice-parties-right {
+                text-align: left;
+            }
+
+            .invoice-modal .modal-body,
+            .invoice-modal .modal-header,
+            .invoice-modal .modal-footer {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="invoices-page">
+        <div class="invoices-heading">
+            <div class="invoices-eyebrow">Historial</div>
+            <h1 class="invoices-title">Facturas generadas</h1>
+            <p class="invoices-description">Consulta e imprime los comprobantes de cada venta.</p>
+        </div>
+
+        <section class="invoices-card" aria-label="Facturas generadas">
+            <div class="table-responsive">
+                <table class="invoices-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Factura</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Vendedor</th>
+                            <th scope="col">Pago</th>
+                            <th scope="col" class="text-end">Total</th>
+                            <th scope="col" class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for factura in facturas %}
+                            <tr>
+                                <td>
+                                    <a class="invoice-number-btn"
+                                       href="{{ url_for('invoice', invoice_id=factura.id_factura) }}"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#invoiceModal"
+                                       data-invoice-id="{{ factura.id_factura }}"
+                                       data-pdf-url="{{ url_for('invoice_pdf', invoice_id=factura.id_factura) }}">
+                                        {{ factura.numero_factura }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="invoice-client-name">{{ factura.cliente }}</div>
+                                    {% if factura.contacto %}
+                                        <div class="invoice-client-contact">{{ factura.contacto }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ factura.fecha_display }}</td>
+                                <td>{{ factura.vendedor }}</td>
+                                <td><span class="payment-pill" title="El método de pago no está registrado en los datos de la venta">No registrado</span></td>
+                                <td class="text-end invoice-total-cell">{{ factura.total_display }}</td>
+                                <td class="text-end">
+                                    <a class="invoice-action"
+                                       href="{{ url_for('invoice', invoice_id=factura.id_factura) }}"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#invoiceModal"
+                                       data-invoice-id="{{ factura.id_factura }}"
+                                       data-pdf-url="{{ url_for('invoice_pdf', invoice_id=factura.id_factura) }}"
+                                       title="Ver factura {{ factura.numero_factura }}"
+                                       aria-label="Ver factura {{ factura.numero_factura }}">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="invoices-empty">
+                                    <i class="bi bi-receipt d-block fs-4 mb-2" aria-hidden="true"></i>
+                                    Aún no hay facturas generadas.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog invoice-modal-dialog modal-dialog-centered">
+            <div class="modal-content invoice-modal">
+                <div class="modal-header">
+                    <div>
+                        <div class="invoice-modal-eyebrow">Comprobante de venta</div>
+                        <h2 class="modal-title" id="invoiceModalLabel">Factura</h2>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="invoice-sheet">
+                        <div class="invoice-sheet-header">
+                            <div class="invoice-brand">
+                                <span class="invoice-brand-icon" aria-hidden="true"><i class="bi bi-cake2"></i></span>
+                                <div>
+                                    <div class="invoice-brand-name">Dulce Gestión</div>
+                                    <div class="invoice-brand-tagline">Postrería · CRM + POS</div>
+                                </div>
+                            </div>
+                            <div class="invoice-meta">
+                                <div class="invoice-meta-label">Factura de venta</div>
+                                <div class="invoice-meta-number" id="invoice-number">—</div>
+                                <div class="invoice-meta-date" id="invoice-date">—</div>
+                            </div>
+                        </div>
+
+                        <hr class="invoice-divider">
+
+                        <div class="invoice-parties">
+                            <div>
+                                <div class="invoice-label">Facturado a</div>
+                                <div class="invoice-client" id="invoice-client">—</div>
+                                <div class="invoice-contact" id="invoice-contact"></div>
+                            </div>
+                            <div class="invoice-parties-right">
+                                <div class="invoice-label">Atendido por</div>
+                                <div class="invoice-seller" id="invoice-seller">—</div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive invoice-table-wrap">
+                            <table class="invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Cant.</th>
+                                        <th scope="col">Precio</th>
+                                        <th scope="col">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-items"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="invoice-totals">
+                            <div class="invoice-totals-box">
+                                <div class="invoice-total-row">
+                                    <span>Subtotal</span>
+                                    <span id="invoice-subtotal">$ 0</span>
+                                </div>
+                                <div class="invoice-total-row invoice-total-final">
+                                    <span>Total</span>
+                                    <span id="invoice-total">$ 0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="invoice-thanks">Gracias por endulzar tu día con nosotros.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="invoice-button invoice-button-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a class="invoice-button invoice-button-primary" id="invoice-download" href="#" download>
+                        <i class="bi bi-printer"></i> Imprimir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="application/json" id="invoices-data">{{ facturas_json|tojson }}</script>
+    <script>
+        (() => {
+            const dataElement = document.getElementById('invoices-data');
+            const modalElement = document.getElementById('invoiceModal');
+            if (!dataElement || !modalElement) return;
+
+            let invoices = [];
+            try {
+                invoices = JSON.parse(dataElement.textContent || '[]');
+            } catch (error) {
+                invoices = [];
+            }
+
+            const invoicesById = new Map(invoices.map(invoice => [String(invoice.id), invoice]));
+
+            const setText = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value || '';
+            };
+
+            modalElement.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) return;
+
+                const invoice = invoicesById.get(trigger.getAttribute('data-invoice-id'));
+                if (!invoice) return;
+
+                setText('invoiceModalLabel', `Factura ${invoice.numero}`);
+                setText('invoice-number', invoice.numero);
+                setText('invoice-date', invoice.fecha);
+                setText('invoice-client', invoice.cliente);
+                const contactParts = [];
+                if (invoice.telefono) contactParts.push(`Tel. ${invoice.telefono}`);
+                if (invoice.email) contactParts.push(invoice.email);
+                setText('invoice-contact', contactParts.join(' · '));
+                setText('invoice-seller', invoice.vendedor);
+                setText('invoice-subtotal', invoice.subtotal);
+                setText('invoice-total', invoice.total);
+
+                const itemsBody = document.getElementById('invoice-items');
+                itemsBody.replaceChildren();
+
+                if (!invoice.items || invoice.items.length === 0) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 4;
+                    cell.className = 'invoice-items-empty';
+                    cell.textContent = 'Esta factura no tiene productos registrados.';
+                    row.append(cell);
+                    itemsBody.append(row);
+                } else {
+                    invoice.items.forEach(item => {
+                        const row = document.createElement('tr');
+                        [item.nombre, String(item.cantidad), item.precio, item.subtotal].forEach((value, index) => {
+                            const cell = document.createElement('td');
+                            cell.textContent = value;
+                            if (index > 0) cell.className = 'text-end';
+                            row.append(cell);
+                        });
+                        itemsBody.append(row);
+                    });
+                }
+
+                const download = document.getElementById('invoice-download');
+                if (download) {
+                    download.href = trigger.getAttribute('data-pdf-url') || '#';
+                    download.setAttribute('aria-label', `Descargar factura ${invoice.numero} en PDF`);
+                }
+            });
+        })();
+    </script>
+{% endblock %}

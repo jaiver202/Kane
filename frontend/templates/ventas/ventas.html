@@ -384,50 +384,6 @@
             margin-top: .8rem;
         }
 
-        .sales-empty-message {
-            margin: 0;
-            padding: 1.2rem;
-            color: #8c7781;
-            font-size: .8rem;
-        }
-
-        .recent-sales {
-            margin-top: 1rem;
-        }
-
-        .recent-sales-table {
-            width: 100%;
-            margin: 0;
-            border-collapse: collapse;
-            color: #725d67;
-            font-size: .77rem;
-        }
-
-        .recent-sales-table th {
-            padding: .7rem 1rem;
-            border-bottom: 1px solid #f0e5e9;
-            background: #fdfafb;
-            color: #8d7580;
-            font-size: .64rem;
-            letter-spacing: .06em;
-            text-align: left;
-            text-transform: uppercase;
-        }
-
-        .recent-sales-table td {
-            padding: .7rem 1rem;
-            border-bottom: 1px solid #f2e8ec;
-        }
-
-        .recent-sales-table tbody tr:last-child td {
-            border-bottom: 0;
-        }
-
-        .recent-sales-table a {
-            color: #a83e69;
-            font-weight: 700;
-        }
-
         @media (max-width: 1050px) {
             .pos-layout {
                 grid-template-columns: minmax(0, 1fr) 300px;
@@ -556,47 +512,6 @@
                 </div>
             </form>
         {% endif %}
-
-        <section class="pos-panel recent-sales" aria-label="Ventas recientes">
-            <div class="pos-panel-header">
-                <h2>Ventas recientes</h2>
-                <span class="pos-panel-count">Últimas {{ ventas|length }}</span>
-            </div>
-            {% if ventas %}
-                <div class="table-responsive">
-                    <table class="recent-sales-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Venta</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col">Cliente</th>
-                                <th scope="col">Total</th>
-                                <th scope="col">Factura</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for venta in ventas %}
-                                <tr>
-                                    <td>#{{ venta.id_venta }}</td>
-                                    <td>{{ venta.fecha_venta }}</td>
-                                    <td>{{ venta.cliente }}</td>
-                                    <td>${{ "%.2f"|format(venta.total) }}</td>
-                                    <td>
-                                        {% if venta.id_factura %}
-                                            <a href="{{ url_for('invoice', invoice_id=venta.id_factura) }}">{{ venta.numero_factura }}</a>
-                                        {% else %}
-                                            Sin factura
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="sales-empty-message">Aún no hay ventas.</p>
-            {% endif %}
-        </section>
     </div>
 
     <script>

@@ -244,89 +244,84 @@
             text-align: center;
         }
 
-        .client-dialog {
-            width: min(640px, calc(100% - 2rem));
-            max-height: calc(100% - 2rem);
-            padding: 0;
-            overflow: auto;
+        .client-modal {
             border: 1px solid #eddee4;
             border-radius: 18px;
-            background: #fff;
-            color: #2a121d;
             box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
         }
 
-        .client-dialog::backdrop {
-            background: rgba(42, 18, 29, .48);
-            backdrop-filter: blur(2px);
-        }
-
-        .client-dialog-header {
-            display: flex;
+        .client-modal .modal-header {
             align-items: flex-start;
-            justify-content: space-between;
-            padding: 1.2rem 1.4rem;
+            padding: 1.15rem 1.4rem;
             border-bottom: 1px solid #f0e5e9;
         }
 
-        .client-dialog-header h2 {
-            margin: 0;
+        .client-modal-eyebrow {
+            color: #a53d68;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .client-modal .modal-title {
+            margin: .2rem 0 0;
+            color: #2a121d;
             font-family: 'Playfair Display', serif;
             font-size: 1.5rem;
+            font-weight: 700;
         }
 
-        .client-dialog-header p {
-            margin: .2rem 0 0;
+        .client-modal-subtitle {
+            margin: .15rem 0 0;
             color: #8a747e;
-            font-size: .82rem;
+            font-size: .8rem;
         }
 
-        .client-dialog-close {
-            border: 0;
-            background: transparent;
-            color: #846e78;
-            font-size: 1.35rem;
+        .client-modal .modal-body {
+            padding: 1.2rem 1.4rem;
         }
 
-        .client-dialog-body {
-            padding: 1.2rem 1.4rem 1.4rem;
-        }
-
-        .client-form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: .9rem;
-        }
-
-        .client-form-grid label {
-            display: block;
+        .client-modal .form-label {
             margin-bottom: .35rem;
             color: #624b56;
             font-size: .76rem;
             font-weight: 700;
         }
 
-        .client-form-grid input {
-            width: 100%;
+        .client-modal .form-control {
             padding: .62rem .7rem;
             border: 1px solid #e8dbe0;
             border-radius: 9px;
-            background: #fdfafb;
+            background-color: #fdfafb;
             color: #39232d;
             font-size: .82rem;
         }
 
-        .client-form-grid input:focus {
+        .client-modal .form-control:focus {
             border-color: #cb8da6;
-            outline: 0;
+            background-color: #fff;
             box-shadow: 0 0 0 3px rgba(216, 108, 144, .12);
         }
 
-        .client-form-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: .55rem;
-            margin-top: 1.25rem;
+        .client-modal .form-text {
+            color: #9c858f;
+            font-size: .72rem;
+        }
+
+        .client-modal .modal-footer {
+            padding: 1rem 1.4rem 1.15rem;
+            border-top: 1px solid #f0e5e9;
+        }
+
+        .client-modal .clients-button {
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+        }
+
+        .modal-backdrop.show {
+            opacity: .5;
+            backdrop-filter: blur(2px);
         }
 
         .clients-no-results[hidden],
@@ -359,12 +354,9 @@
         }
 
         @media (max-width: 575.98px) {
-            .client-form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .client-dialog-header,
-            .client-dialog-body {
+            .client-modal .modal-header,
+            .client-modal .modal-body,
+            .client-modal .modal-footer {
                 padding-right: 1rem;
                 padding-left: 1rem;
             }
@@ -384,7 +376,7 @@
             <a class="clients-button" href="{{ url_for('client_report') }}">
                 <i class="bi bi-printer"></i> Reporte
             </a>
-            <button class="clients-button clients-button-primary" type="button" id="open-client-dialog">
+            <button class="clients-button clients-button-primary" type="button" data-bs-toggle="modal" data-bs-target="#newClientModal">
                 <i class="bi bi-plus-lg"></i> Nuevo cliente
             </button>
         </div>
@@ -428,7 +420,18 @@
                                 <td>{{ cliente.pais }}</td>
                                 <td>
                                     <div class="client-actions">
-                                        <a class="client-action" href="{{ url_for('edit_client', client_id=cliente.id_cliente) }}" aria-label="Editar {{ cliente.nombre }}" title="Editar">
+                                        <a class="client-action"
+                                           href="{{ url_for('edit_client', client_id=cliente.id_cliente) }}"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#editClientModal"
+                                           data-edit-url="{{ url_for('edit_client', client_id=cliente.id_cliente) }}"
+                                           data-client-name="{{ cliente.nombre }}"
+                                           data-client-country="{{ cliente.pais }}"
+                                           data-client-email="{{ cliente.email or '' }}"
+                                           data-client-phone="{{ cliente.telefono or '' }}"
+                                           data-client-city="{{ cliente.ciudad or '' }}"
+                                           data-client-address="{{ cliente.direccion or '' }}"
+                                           aria-label="Editar {{ cliente.nombre }}" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <form class="client-action-form" method="post" action="{{ url_for('delete_client', client_id=cliente.id_cliente) }}" onsubmit="return confirm('¿Eliminar este cliente?');">
@@ -442,11 +445,11 @@
                             </tr>
                         {% else %}
                             <tr id="clients-empty-row">
-                                <td class="clients-empty" colspan="6">Aún no hay clientes registrados.</td>
+                                <td class="clients-empty" colspan="5">Aún no hay clientes registrados.</td>
                             </tr>
                         {% endfor %}
                         <tr class="clients-no-results" id="clients-no-results" hidden>
-                            <td class="clients-empty" colspan="6">No se encontraron clientes con esa búsqueda.</td>
+                            <td class="clients-empty" colspan="5">No se encontraron clientes con esa búsqueda.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -454,65 +457,149 @@
         </section>
     </div>
 
-    <dialog class="client-dialog" id="client-dialog" aria-labelledby="client-dialog-title">
-        <div class="client-dialog-header">
-            <div>
-                <h2 id="client-dialog-title">Nuevo cliente</h2>
-                <p>Completa la información para registrar un cliente.</p>
+    <div class="modal fade" id="newClientModal" tabindex="-1" aria-labelledby="newClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content client-modal">
+                <form method="post" action="{{ url_for('create_client') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="client-modal-eyebrow">Información CRM</div>
+                            <h2 class="modal-title" id="newClientModalLabel">Nuevo cliente</h2>
+                            <p class="client-modal-subtitle">Completa la información para registrar un cliente.</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input id="nombre" name="nombre" class="form-control" maxlength="100" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="pais" class="form-label">País / nacionalidad *</label>
+                                <input id="pais" name="pais" class="form-control" maxlength="50" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="email" class="form-label">Correo</label>
+                                <input id="email" name="email" type="email" class="form-control" maxlength="100">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input id="telefono" name="telefono" class="form-control" maxlength="20">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="ciudad" class="form-label">Ciudad</label>
+                                <input id="ciudad" name="ciudad" class="form-control" maxlength="50">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <input id="direccion" name="direccion" class="form-control" maxlength="150">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="clients-button" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="clients-button clients-button-primary">Guardar cliente</button>
+                    </div>
+                </form>
             </div>
-            <button class="client-dialog-close" type="button" id="close-client-dialog" aria-label="Cerrar">&times;</button>
         </div>
-        <div class="client-dialog-body">
-            <form method="post" action="{{ url_for('create_client') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="client-form-grid">
-                    <div>
-                        <label for="nombre">Nombre *</label>
-                        <input id="nombre" name="nombre" maxlength="100" required>
+    </div>
+
+    <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content client-modal">
+                <form method="post" id="edit-client-form" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="client-modal-eyebrow">Información CRM</div>
+                            <h2 class="modal-title" id="editClientModalLabel">Editar cliente</h2>
+                            <p class="client-modal-subtitle">Actualiza los datos de contacto del cliente.</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                    <div>
-                        <label for="pais">País / nacionalidad *</label>
-                        <input id="pais" name="pais" maxlength="50" required>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-nombre" class="form-label">Nombre *</label>
+                                <input id="edit-nombre" name="nombre" class="form-control" maxlength="100" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-pais" class="form-label">País / nacionalidad *</label>
+                                <input id="edit-pais" name="pais" class="form-control" maxlength="50" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-email" class="form-label">Correo</label>
+                                <input id="edit-email" name="email" type="email" class="form-control" maxlength="100">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-telefono" class="form-label">Teléfono</label>
+                                <input id="edit-telefono" name="telefono" class="form-control" maxlength="20">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-ciudad" class="form-label">Ciudad</label>
+                                <input id="edit-ciudad" name="ciudad" class="form-control" maxlength="50">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="edit-direccion" class="form-label">Dirección</label>
+                                <input id="edit-direccion" name="direccion" class="form-control" maxlength="150">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="email">Correo</label>
-                        <input id="email" name="email" type="email" maxlength="100">
+                    <div class="modal-footer">
+                        <button type="button" class="clients-button" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="clients-button clients-button-primary">Guardar cliente</button>
                     </div>
-                    <div>
-                        <label for="telefono">Teléfono</label>
-                        <input id="telefono" name="telefono" maxlength="20">
-                    </div>
-                    <div>
-                        <label for="ciudad">Ciudad</label>
-                        <input id="ciudad" name="ciudad" maxlength="50">
-                    </div>
-                    <div>
-                        <label for="direccion">Dirección</label>
-                        <input id="direccion" name="direccion" maxlength="150">
-                    </div>
-                </div>
-                <div class="client-form-footer">
-                    <button class="clients-button" type="button" id="cancel-client-dialog">Cancelar</button>
-                    <button class="clients-button clients-button-primary" type="submit">Guardar cliente</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </dialog>
+    </div>
+
+
+    
+
 
     <script>
         (() => {
-            const dialog = document.getElementById('client-dialog');
             const search = document.getElementById('client-search');
             const rows = Array.from(document.querySelectorAll('.client-row'));
             const count = document.getElementById('client-count');
             const noResults = document.getElementById('clients-no-results');
+            const editModal = document.getElementById('editClientModal');
+            const editForm = document.getElementById('edit-client-form');
+            const newModal = document.getElementById('newClientModal');
 
-            document.getElementById('open-client-dialog').addEventListener('click', () => dialog.showModal());
-            document.getElementById('close-client-dialog').addEventListener('click', () => dialog.close());
-            document.getElementById('cancel-client-dialog').addEventListener('click', () => dialog.close());
-            dialog.addEventListener('click', event => {
-                if (event.target === dialog) dialog.close();
-            });
+            if (editModal && editForm) {
+                editModal.addEventListener('show.bs.modal', event => {
+                    const trigger = event.relatedTarget;
+                    if (!trigger) return;
+
+                    editForm.action = trigger.getAttribute('data-edit-url') || '';
+
+                    const fill = (id, value) => {
+                        const field = document.getElementById(id);
+                        if (field) field.value = value || '';
+                    };
+
+                    fill('edit-nombre', trigger.getAttribute('data-client-name'));
+                    fill('edit-pais', trigger.getAttribute('data-client-country'));
+                    fill('edit-email', trigger.getAttribute('data-client-email'));
+                    fill('edit-telefono', trigger.getAttribute('data-client-phone'));
+                    fill('edit-ciudad', trigger.getAttribute('data-client-city'));
+                    fill('edit-direccion', trigger.getAttribute('data-client-address'));
+                });
+
+                editModal.addEventListener('hidden.bs.modal', () => editForm.reset());
+            }
+
+            if (newModal) {
+                newModal.addEventListener('hidden.bs.modal', () => {
+                    const form = newModal.querySelector('form');
+                    if (form) form.reset();
+                });
+            }
 
             search.addEventListener('input', () => {
                 const query = search.value.trim().toLocaleLowerCase();
