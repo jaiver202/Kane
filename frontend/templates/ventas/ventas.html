@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de ventas | Kane{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .sales-page {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .sales-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .sales-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .sales-title {
+            margin: .2rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .sales-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .sales-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            min-height: 40px;
+            padding: .55rem .95rem;
+            border: 1px solid #ead8df;
+            border-radius: 11px;
+            background: #fff;
+            color: #5b404b;
+            font-size: .82rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background-color .15s ease, transform .15s ease;
+        }
+
+        .sales-button:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+            transform: translateY(-1px);
+        }
+
+        .sales-button-primary {
+            border-color: #a83e69;
+            background: #a83e69;
+            color: #fff;
+        }
+
+        .sales-button-primary:hover {
+            border-color: #913459;
+            background: #913459;
+            color: #fff;
+        }
+
+        .sales-button:disabled {
+            border-color: #ddb8c7;
+            background: #d3a0b4;
+            color: #fff;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pos-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 342px);
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .pos-panel {
+            overflow: hidden;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .pos-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .95rem 1.1rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .pos-panel-header h2 {
+            margin: 0;
+            color: #38232d;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .pos-panel-count {
+            color: #927d87;
+            font-size: .72rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-content: start;
+            gap: .7rem;
+            padding: .85rem;
+        }
+
+        .product-card {
+            position: relative;
+            min-width: 0;
+            min-height: 154px;
+            padding: .85rem;
+            border: 1px solid #eddee4;
+            border-radius: 15px;
+            background: #fff;
+            transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+
+        .product-card:hover {
+            border-color: #d9a1b5;
+            box-shadow: 0 5px 14px rgba(111, 35, 67, .07);
+            transform: translateY(-1px);
+        }
+
+        .product-icon {
+            display: flex;
+            width: 36px;
+            height: 36px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: .75rem;
+            border-radius: 11px;
+            background: #f9e9ef;
+            color: #b13e6d;
+            font-size: 1rem;
+        }
+
+        .product-name {
+            overflow: hidden;
+            margin: 0 0 .18rem;
+            color: #38232d;
+            font-size: .84rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .product-meta {
+            overflow: hidden;
+            color: #927d87;
+            font-size: .7rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .product-price {
+            margin-top: .65rem;
+            color: #a83e69;
+            font-size: .85rem;
+            font-weight: 700;
+        }
+
+        .product-stock {
+            margin-top: .12rem;
+            color: #927d87;
+            font-size: .68rem;
+        }
+
+        .product-stock-low {
+            color: #bd4d2a;
+        }
+
+        .product-add {
+            position: absolute;
+            right: .75rem;
+            bottom: .7rem;
+            display: flex;
+            width: 30px;
+            height: 30px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 9px;
+            background: #a83e69;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .product-add:hover:not(:disabled) {
+            background: #913459;
+        }
+
+        .product-add:disabled {
+            background: #d9cbd1;
+            cursor: not-allowed;
+        }
+
+        .pos-order {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .order-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: .25rem;
+            background: #fffafb;
+        }
+
+        .order-eyebrow {
+            color: #a83e69;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+
+        .order-heading h2 {
+            font-size: 1rem;
+        }
+
+        .order-content {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .order-field-label {
+            display: block;
+            margin-bottom: .4rem;
+            color: #735d68;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .order-client {
+            width: 100%;
+            min-height: 40px;
+            padding: .55rem .7rem;
+            border: 1px solid #e8dbe0;
+            border-radius: 10px;
+            background: #fff;
+            color: #503945;
+            font-size: .78rem;
+        }
+
+        .order-items {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: .55rem;
+            max-height: 280px;
+            min-height: 145px;
+            margin: .8rem 0;
+            overflow: auto;
+        }
+
+        .order-empty {
+            display: flex;
+            flex: 1;
+            min-height: 145px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            color: #a38d97;
+            font-size: .78rem;
+            text-align: center;
+        }
+
+        .order-empty i {
+            color: #c9a5b4;
+            font-size: 1.2rem;
+        }
+
+        .order-empty[hidden] {
+            display: none;
+        }
+
+        .order-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: .5rem;
+            padding: .62rem .65rem;
+            border: 1px solid #f0e5e9;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .order-item-name {
+            overflow: hidden;
+            color: #49333e;
+            font-size: .74rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .order-item-price {
+            margin-top: .14rem;
+            color: #927d87;
+            font-size: .68rem;
+        }
+
+        .order-item-controls {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .order-quantity {
+            width: 52px;
+            padding: .32rem .25rem;
+            border: 1px solid #eadde2;
+            border-radius: 7px;
+            color: #49333e;
+            font-size: .74rem;
+            text-align: center;
+        }
+
+        .order-remove {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #9c7e8b;
+        }
+
+        .order-remove:hover {
+            background: #fff0f0;
+            color: #bd3b4b;
+        }
+
+        .order-summary {
+            padding-top: .8rem;
+            border-top: 1px solid #f0e5e9;
+        }
+
+        .order-total-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #38232d;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+
+        .order-total-row output {
+            font-size: 1rem;
+        }
+
+        .order-submit {
+            width: 100%;
+            min-height: 42px;
+            margin-top: .8rem;
+        }
+
+        .sales-empty-message {
+            margin: 0;
+            padding: 1.2rem;
+            color: #8c7781;
+            font-size: .8rem;
+        }
+
+        .recent-sales {
+            margin-top: 1rem;
+        }
+
+        .recent-sales-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            color: #725d67;
+            font-size: .77rem;
+        }
+
+        .recent-sales-table th {
+            padding: .7rem 1rem;
+            border-bottom: 1px solid #f0e5e9;
+            background: #fdfafb;
+            color: #8d7580;
+            font-size: .64rem;
+            letter-spacing: .06em;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .recent-sales-table td {
+            padding: .7rem 1rem;
+            border-bottom: 1px solid #f2e8ec;
+        }
+
+        .recent-sales-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .recent-sales-table a {
+            color: #a83e69;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1050px) {
+            .pos-layout {
+                grid-template-columns: minmax(0, 1fr) 300px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .sales-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .pos-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .pos-order {
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-card {
+                min-height: 145px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="sales-page">
+        <div class="sales-heading">
+            <div>
+                <div class="sales-eyebrow">Módulo 2</div>
+                <h1 class="sales-title">Registro de ventas</h1>
+                <p class="sales-description">Selecciona productos, valida existencias y genera la factura.</p>
+            </div>
+            <a class="sales-button" href="{{ url_for('products') }}">
+                <i class="bi bi-plus-lg"></i> Producto
+            </a>
+        </div>
+
+        {% if not clientes %}
+            <div class="alert alert-warning rounded-3" role="status">Registra un cliente antes de crear una venta.</div>
+        {% elif not productos %}
+            <div class="alert alert-warning rounded-3" role="status">Registra un producto y sus existencias antes de crear una venta.</div>
+        {% else %}
+            <form method="post" action="{{ url_for('create_sale') }}" id="sale-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="pos-layout">
+                    <section class="pos-panel" aria-label="Catálogo disponible">
+                        <div class="pos-panel-header">
+                            <h2>Catálogo disponible</h2>
+                            <span class="pos-panel-count">{{ productos|length }} productos</span>
+                        </div>
+                        <div class="product-grid">
+                            {% for producto in productos %}
+                                <article class="product-card">
+                                    <div class="product-icon" aria-hidden="true"><i class="bi bi-cake2"></i></div>
+                                    <h3 class="product-name" title="{{ producto.nombre_producto }}">{{ producto.nombre_producto }}</h3>
+                                    <div class="product-meta">Producto #{{ producto.id_producto }}</div>
+                                    <div class="product-price">${{ "%.2f"|format(producto.precio) }}</div>
+                                    <div class="product-stock {% if producto.cantidad_disponible > 0 and producto.cantidad_disponible <= 3 %}product-stock-low{% endif %}">
+                                        {{ producto.cantidad_disponible }} disponibles
+                                    </div>
+                                    <button
+                                        class="product-add"
+                                        type="button"
+                                        aria-label="Agregar {{ producto.nombre_producto }}"
+                                        title="{% if producto.registros_stock != 1 %}Revisa el registro de stock{% elif producto.cantidad_disponible <= 0 %}Sin existencias{% else %}Agregar al pedido{% endif %}"
+                                        data-product-id="{{ producto.id_producto }}"
+                                        data-product-name="{{ producto.nombre_producto }}"
+                                        data-product-price="{{ '%.2f'|format(producto.precio) }}"
+                                        data-product-stock="{{ producto.cantidad_disponible }}"
+                                        {% if producto.cantidad_disponible <= 0 or producto.registros_stock != 1 %}disabled{% endif %}>
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="pos-panel pos-order" aria-label="Detalle del pedido">
+                        <div class="pos-panel-header order-heading">
+                            <span class="order-eyebrow">Venta actual</span>
+                            <h2>Detalle del pedido</h2>
+                        </div>
+                        <div class="order-content">
+                            <div>
+                                <label class="order-field-label" for="id_cliente">Cliente</label>
+                                <select class="order-client" id="id_cliente" name="id_cliente" required>
+                                    <option value="">Seleccionar cliente...</option>
+                                    {% for cliente in clientes %}
+                                        <option value="{{ cliente.id_cliente }}">
+                                            {{ cliente.nombre }}{% if cliente.email %} — {{ cliente.email }}{% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="order-items" id="sale-items" aria-live="polite"></div>
+                            <div class="order-empty" id="order-empty">
+                                <i class="bi bi-cart3" aria-hidden="true"></i>
+                                <span>Tu pedido está vacío</span>
+                            </div>
+
+                            <div class="order-summary">
+                                <div class="order-total-row">
+                                    <span>Total</span>
+                                    <output id="sale-total">$ 0</output>
+                                </div>
+                                <button class="sales-button sales-button-primary order-submit" id="sale-submit" type="submit" disabled>
+                                    Cobrar y generar factura <i class="bi bi-receipt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </form>
+        {% endif %}
+
+        <section class="pos-panel recent-sales" aria-label="Ventas recientes">
+            <div class="pos-panel-header">
+                <h2>Ventas recientes</h2>
+                <span class="pos-panel-count">Últimas {{ ventas|length }}</span>
+            </div>
+            {% if ventas %}
+                <div class="table-responsive">
+                    <table class="recent-sales-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Venta</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Factura</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ventas %}
+                                <tr>
+                                    <td>#{{ venta.id_venta }}</td>
+                                    <td>{{ venta.fecha_venta }}</td>
+                                    <td>{{ venta.cliente }}</td>
+                                    <td>${{ "%.2f"|format(venta.total) }}</td>
+                                    <td>
+                                        {% if venta.id_factura %}
+                                            <a href="{{ url_for('invoice', invoice_id=venta.id_factura) }}">{{ venta.numero_factura }}</a>
+                                        {% else %}
+                                            Sin factura
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="sales-empty-message">Aún no hay ventas.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        (() => {
+            const form = document.getElementById('sale-form');
+            if (!form) return;
+
+            const cart = new Map();
+            const itemsContainer = document.getElementById('sale-items');
+            const emptyMessage = document.getElementById('order-empty');
+            const totalOutput = document.getElementById('sale-total');
+            const submitButton = document.getElementById('sale-submit');
+            const clientSelect = document.getElementById('id_cliente');
+            const currency = new Intl.NumberFormat('es-CO', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+
+            function renderCart() {
+                itemsContainer.replaceChildren();
+                let totalCents = 0;
+
+                cart.forEach(item => {
+                    totalCents += item.priceCents * item.quantity;
+                    const row = document.createElement('div');
+                    row.className = 'order-item';
+
+                    const details = document.createElement('div');
+                    const name = document.createElement('div');
+                    name.className = 'order-item-name';
+                    name.textContent = item.name;
+                    const price = document.createElement('div');
+                    price.className = 'order-item-price';
+                    price.textContent = `$ ${currency.format(item.priceCents / 100)} c/u`;
+                    details.append(name, price);
+
+                    const controls = document.createElement('div');
+                    controls.className = 'order-item-controls';
+                    const productInput = document.createElement('input');
+                    productInput.type = 'hidden';
+                    productInput.name = 'id_producto';
+                    productInput.value = item.id;
+                    const quantityInput = document.createElement('input');
+                    quantityInput.className = 'order-quantity';
+                    quantityInput.type = 'number';
+                    quantityInput.name = 'cantidad';
+                    quantityInput.min = '1';
+                    quantityInput.max = String(item.stock);
+                    quantityInput.step = '1';
+                    quantityInput.value = String(item.quantity);
+                    quantityInput.required = true;
+                    quantityInput.setAttribute('aria-label', `Cantidad de ${item.name}`);
+                    quantityInput.addEventListener('change', () => {
+                        const nextQuantity = Number.parseInt(quantityInput.value, 10);
+                        if (!Number.isInteger(nextQuantity) || nextQuantity < 1) {
+                            item.quantity = 1;
+                        } else {
+                            item.quantity = Math.min(nextQuantity, item.stock);
+                        }
+                        renderCart();
+                    });
+
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'order-remove';
+                    removeButton.type = 'button';
+                    removeButton.setAttribute('aria-label', `Quitar ${item.name}`);
+                    removeButton.title = 'Quitar producto';
+                    removeButton.innerHTML = '<i class="bi bi-trash3"></i>';
+                    removeButton.addEventListener('click', () => {
+                        cart.delete(item.id);
+                        renderCart();
+                    });
+
+                    controls.append(productInput, quantityInput, removeButton);
+                    row.append(details, controls);
+                    itemsContainer.append(row);
+                });
+
+                emptyMessage.hidden = cart.size > 0;
+                totalOutput.textContent = `$ ${currency.format(totalCents / 100)}`;
+                submitButton.disabled = cart.size === 0 || !clientSelect.value;
+            }
+
+            document.querySelectorAll('.product-add').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.dataset.productId;
+                    const stock = Number.parseInt(button.dataset.productStock, 10);
+                    const existing = cart.get(id);
+                    if (existing) {
+                        if (existing.quantity < stock) existing.quantity += 1;
+                    } else {
+                        cart.set(id, {
+                            id,
+                            name: button.dataset.productName,
+                            priceCents: Math.round(Number(button.dataset.productPrice) * 100),
+                            stock,
+                            quantity: 1
+                        });
+                    }
+                    renderCart();
+                });
+            });
+
+            clientSelect.addEventListener('change', renderCart);
+            form.addEventListener('submit', event => {
+                if (cart.size === 0 || !clientSelect.value) {
+                    event.preventDefault();
+                }
+            });
+        })();
+    </script>
+{% endblock %}

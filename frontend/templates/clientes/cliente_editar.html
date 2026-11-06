@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Editar cliente | Kane{% endblock %}
+
+{% block content %}
+    <h1>Editar cliente</h1>
+    <form method="post" action="{{ url_for('edit_client', client_id=cliente.id_cliente) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-grid">
+            <div>
+                <label for="nombre">Nombre *</label>
+                <input id="nombre" name="nombre" maxlength="100" value="{{ cliente.nombre }}" required>
+            </div>
+            <div>
+                <label for="pais">País / nacionalidad *</label>
+                <input id="pais" name="pais" maxlength="50" value="{{ cliente.pais }}" required>
+            </div>
+            <div>
+                <label for="email">Correo</label>
+                <input id="email" name="email" type="email" maxlength="100" value="{{ cliente.email or '' }}">
+            </div>
+            <div>
+                <label for="telefono">Teléfono</label>
+                <input id="telefono" name="telefono" maxlength="20" value="{{ cliente.telefono or '' }}">
+            </div>
+            <div>
+                <label for="ciudad">Ciudad</label>
+                <input id="ciudad" name="ciudad" maxlength="50" value="{{ cliente.ciudad or '' }}">
+            </div>
+            <div>
+                <label for="direccion">Dirección</label>
+                <input id="direccion" name="direccion" maxlength="150" value="{{ cliente.direccion or '' }}">
+            </div>
+        </div>
+        <p>
+            <button type="submit">Guardar cambios</button>
+            <a href="{{ url_for('clients') }}">Cancelar</a>
+        </p>
+    </form>
+{% endblock %}

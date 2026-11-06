@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Menú principal | Kane{% endblock %}
+
+{% block content %}
+<!-- Saludo y Botón + Nueva venta -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
+    <div>
+        <div class="text-uppercase fw-bold mb-1" style="color: #B23A68; font-size: 0.7rem; letter-spacing: 1px;">Panel General</div>
+        <h1 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif; color: #2A121D; font-size: 2.3rem;">Buen día, {{ nombre_usuario }}</h1>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">Esto es lo que está pasando hoy en tu postrería.</p>
+    </div>
+    <a href="{{ url_for('sales') }}" class="btn text-white rounded-3 px-4 py-2 fw-semibold shadow-sm" style="background-color: #9E335C;">
+        <i class="bi bi-plus-lg me-1"></i> Nueva venta
+    </a>
+</div>
+
+<!-- 4 Tarjetas de Métricas (KPIs) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+            <div class="card-body p-1">
+                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #FCEEF2; color: #B23A68;">
+                    <i class="bi bi-cash fs-5"></i>
+                </div>
+                <div class="text-muted small mb-1">Ventas de hoy</div>
+                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">$ 173.740</div>
+                <div class="text-muted" style="font-size: 0.78rem;">2 transacciones</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+            <div class="card-body p-1">
+                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #F3EEF8; color: #7E57C2;">
+                    <i class="bi bi-people fs-5"></i>
+                </div>
+                <div class="text-muted small mb-1">Clientes activos</div>
+                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">5</div>
+                <div class="text-muted" style="font-size: 0.78rem;">1 clientes VIP</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+            <div class="card-body p-1">
+                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #FDF6EC; color: #D9822B;">
+                    <i class="bi bi-graph-up-arrow fs-5"></i>
+                </div>
+                <div class="text-muted small mb-1">Ventas del mes</div>
+                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">$ 173.740</div>
+                <div class="text-muted" style="font-size: 0.78rem;">Acumulado mensual</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+            <div class="card-body p-1">
+                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 42px; height: 42px; background-color: #EDF5FA; color: #3B82F6;">
+                    <i class="bi bi-box-seam fs-5"></i>
+                </div>
+                <div class="text-muted small mb-1">Stock bajo</div>
+                <div class="fw-bold fs-3 mb-1" style="color: #2A121D;">1</div>
+                <div class="text-muted" style="font-size: 0.78rem;">Productos por reponer</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fila Inferior: Ventas Recientes y Alertas de Inventario -->
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color: #2A121D;">Ventas recientes</h6>
+                        <small class="text-muted" style="font-size: 0.78rem;">Últimos movimientos del punto de venta</small>
+                    </div>
+                    <a href="{{ url_for('sales') }}" class="text-decoration-none small fw-semibold" style="color: #9E335C;">
+                        Ver facturas <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                            <tr class="border-bottom">
+                                <th class="py-3 border-0 fw-semibold">Venta</th>
+                                <th class="py-3 border-0 fw-semibold">Cliente</th>
+                                <th class="py-3 border-0 fw-semibold">Fecha</th>
+                                <th class="py-3 border-0 fw-semibold">Pago</th>
+                                <th class="py-3 border-0 fw-semibold text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.88rem;">
+                            <tr class="border-bottom">
+                                <td class="py-3 fw-bold" style="color: #2A121D;">V-3907786265</td>
+                                <td class="py-3 text-secondary">Laura Martínez</td>
+                                <td class="py-3 text-muted">05 de nov de 2026</td>
+                                <td class="py-3">
+                                    <span class="badge rounded-pill fw-medium px-3 py-1" style="background-color: #F4EFEA; color: #5C4B51;">Efectivo</span>
+                                </td>
+                                <td class="py-3 text-end fw-bold" style="color: #2A121D;">$ 61.880</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 fw-bold border-0" style="color: #2A121D;">V-3904244919</td>
+                                <td class="py-3 text-secondary border-0">Thomas Miller</td>
+                                <td class="py-3 text-muted border-0">05 de nov de 2026</td>
+                                <td class="py-3 border-0">
+                                    <span class="badge rounded-pill fw-medium px-3 py-1" style="background-color: #F4EFEA; color: #5C4B51;">Transferencia</span>
+                                </td>
+                                <td class="py-3 text-end fw-bold border-0" style="color: #2A121D;">$ 111.860</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-0" style="color: #2A121D;">Alertas de inventario</h6>
+                <small class="text-muted d-block mb-3" style="font-size: 0.78rem;">Productos próximos a agotarse</small>
+
+                <div class="rounded-4 p-3 d-flex align-items-center justify-content-between" style="background-color: #FDF6F0;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #FBE6D4; color: #D96B27;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold small" style="color: #2A121D;">Caja de macarons x6</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">GAL-MA-004</div>
+                        </div>
+                    </div>
+                    <span class="fw-bold small" style="color: #D96B27;">1 u.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

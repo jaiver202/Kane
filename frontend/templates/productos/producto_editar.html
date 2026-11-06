@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Editar producto | Kane{% endblock %}
+
+{% block content %}
+    <h1>Editar producto</h1>
+    <form method="post" action="{{ url_for('edit_product', product_id=producto.id_producto) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="nombre_producto">Nombre *</label>
+        <input id="nombre_producto" name="nombre_producto" maxlength="100"
+               value="{{ producto.nombre_producto }}" required>
+        <label for="precio">Precio *</label>
+        <input id="precio" name="precio" type="number" min="0" max="99999999.99"
+               step="0.01" value="{{ producto.precio }}" required>
+        <label for="descripcion">Descripción</label>
+        <input id="descripcion" name="descripcion" value="{{ producto.descripcion or '' }}">
+        <p>
+            <button type="submit">Guardar cambios</button>
+            <a href="{{ url_for('products') }}">Cancelar</a>
+        </p>
+    </form>
+{% endblock %}
