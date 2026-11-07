@@ -217,6 +217,145 @@
             cursor: not-allowed;
         }
 
+        .product-edit {
+            position: absolute;
+            top: .55rem;
+            right: .55rem;
+            display: flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #a68d98;
+            font-size: .8rem;
+            transition: background-color .15s ease, color .15s ease;
+        }
+
+        .product-edit:hover {
+            background: #f9e9ef;
+            color: #a83e69;
+        }
+
+        .product-edit-modal-dialog {
+            max-width: 590px;
+        }
+
+        .product-edit-modal {
+            overflow: hidden;
+            border: 1px solid #eddee4;
+            border-radius: 18px;
+            box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
+        }
+
+        .product-edit-modal .modal-header {
+            align-items: flex-start;
+            padding: 1.05rem 1.4rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .product-edit-eyebrow {
+            margin-bottom: .2rem;
+            color: #a53d68;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .product-edit-modal .modal-title {
+            margin: 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .product-edit-modal .modal-body {
+            padding: 1.15rem 1.4rem;
+        }
+
+        .product-edit-modal .modal-footer {
+            padding: .9rem 1.4rem;
+            border-top: 1px solid #f0e5e9;
+            background: #fdf9fa;
+        }
+
+        .product-edit-label {
+            margin-bottom: .35rem;
+            color: #4b303c;
+            font-size: .74rem;
+            font-weight: 700;
+        }
+
+        .product-edit-modal .form-control {
+            padding: .55rem .7rem;
+            border-color: #e8d9df;
+            border-radius: 10px;
+            color: #38232d;
+            font-size: .82rem;
+        }
+
+        .product-edit-modal .form-control:focus {
+            border-color: #c97c98;
+            box-shadow: 0 0 0 .2rem rgba(184, 90, 122, .12);
+        }
+
+        .product-edit-hint {
+            margin: .85rem 0 0;
+            padding: .55rem .7rem;
+            border-radius: 9px;
+            background: #fdf3e7;
+            color: #9a6323;
+            font-size: .72rem;
+        }
+
+        .product-edit-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+            border-radius: 11px;
+            font-size: .84rem;
+            font-weight: 700;
+        }
+
+        .product-edit-secondary {
+            border: 1px solid #ead8df;
+            background: #fff;
+            color: #5b404b;
+        }
+
+        .product-edit-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .product-edit-primary {
+            border: 1px solid #b85a7a;
+            background: #b85a7a;
+            color: #fff;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .product-edit-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        @media (max-width: 575.98px) {
+            .product-edit-modal .modal-body,
+            .product-edit-modal .modal-header,
+            .product-edit-modal .modal-footer {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+        }
+
         .pos-order {
             display: flex;
             flex-direction: column;
@@ -429,7 +568,8 @@
                 <h1 class="sales-title">Registro de ventas</h1>
                 <p class="sales-description">Selecciona productos, valida existencias y genera la factura.</p>
             </div>
-            <a class="sales-button" href="{{ url_for('products') }}">
+            <a class="sales-button" href="{{ url_for('products') }}"
+               data-bs-toggle="modal" data-bs-target="#createSaleProductModal" role="button">
                 <i class="bi bi-plus-lg"></i> Producto
             </a>
         </div>
@@ -450,6 +590,21 @@
                         <div class="product-grid">
                             {% for producto in productos %}
                                 <article class="product-card">
+                                    <button
+                                        class="product-edit"
+                                        type="button"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#productEditModal"
+                                        data-edit-url="{{ url_for('edit_sale_product', product_id=producto.id_producto) }}"
+                                        data-product-name="{{ producto.nombre_producto }}"
+                                        data-product-price="{{ '%.2f'|format(producto.precio) }}"
+                                        data-product-description="{{ producto.descripcion or '' }}"
+                                        data-product-stock="{{ producto.cantidad_disponible }}"
+                                        data-product-stock-records="{{ producto.registros_stock }}"
+                                        title="Editar {{ producto.nombre_producto }}"
+                                        aria-label="Editar {{ producto.nombre_producto }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
                                     <div class="product-icon" aria-hidden="true"><i class="bi bi-cake2"></i></div>
                                     <h3 class="product-name" title="{{ producto.nombre_producto }}">{{ producto.nombre_producto }}</h3>
                                     <div class="product-meta">Producto #{{ producto.id_producto }}</div>
@@ -512,6 +667,90 @@
                 </div>
             </form>
         {% endif %}
+    </div>
+
+    <div class="modal fade" id="createSaleProductModal" tabindex="-1" aria-labelledby="createSaleProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog product-edit-modal-dialog modal-dialog-centered">
+            <div class="modal-content product-edit-modal">
+                <form method="post" action="{{ url_for('create_product') }}" id="create-sale-product-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="origen" value="ventas">
+                    <div class="modal-header">
+                        <div>
+                            <div class="product-edit-eyebrow">Inventario</div>
+                            <h2 class="modal-title" id="createSaleProductModalLabel">Nuevo producto</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label product-edit-label" for="create-sale-product-name">Nombre *</label>
+                                <input class="form-control" id="create-sale-product-name" name="nombre_producto" maxlength="100" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label product-edit-label" for="create-sale-product-price">Precio *</label>
+                                <input class="form-control" id="create-sale-product-price" name="precio" type="number" min="0" max="99999999.99" step="0.01" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label product-edit-label" for="create-sale-product-stock">Existencias *</label>
+                                <input class="form-control" id="create-sale-product-stock" name="cantidad_disponible" type="number" min="0" max="2147483647" step="1" value="0" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label product-edit-label" for="create-sale-product-description">Descripción</label>
+                                <textarea class="form-control" id="create-sale-product-description" name="descripcion" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="product-edit-button product-edit-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="product-edit-button product-edit-primary">Guardar producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productEditModal" tabindex="-1" aria-labelledby="productEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog product-edit-modal-dialog modal-dialog-centered">
+            <div class="modal-content product-edit-modal">
+                <form method="post" action="#" id="product-edit-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="product-edit-eyebrow">Inventario</div>
+                            <h2 class="modal-title" id="productEditModalLabel">Editar producto</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label product-edit-label" for="product-edit-name">Nombre *</label>
+                                <input class="form-control" id="product-edit-name" name="nombre_producto" maxlength="100" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label product-edit-label" for="product-edit-price">Precio *</label>
+                                <input class="form-control" id="product-edit-price" name="precio" type="number" min="0" max="99999999.99" step="0.01" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label product-edit-label" for="product-edit-stock">stock *</label>
+                                <input class="form-control" id="product-edit-stock" name="cantidad_disponible" type="number" min="0" max="2147483647" step="1" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label product-edit-label" for="product-edit-description">Descripción</label>
+                                <textarea class="form-control" id="product-edit-description" name="descripcion" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <p class="product-edit-hint" id="product-edit-stock-hint" hidden></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="product-edit-button product-edit-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="product-edit-button product-edit-primary">Guardar producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -619,6 +858,56 @@
             form.addEventListener('submit', event => {
                 if (cart.size === 0 || !clientSelect.value) {
                     event.preventDefault();
+                }
+            });
+        })();
+    </script>
+
+    <script>
+        (() => {
+            const modalElement = document.getElementById('createSaleProductModal');
+            if (!modalElement) return;
+
+            const form = document.getElementById('create-sale-product-form');
+            const nameInput = document.getElementById('create-sale-product-name');
+
+            modalElement.addEventListener('shown.bs.modal', () => nameInput.focus());
+            modalElement.addEventListener('hidden.bs.modal', () => form.reset());
+        })();
+    </script>
+
+    <script>
+        (() => {
+            const modalElement = document.getElementById('productEditModal');
+            if (!modalElement) return;
+
+            const form = document.getElementById('product-edit-form');
+            const nameInput = document.getElementById('product-edit-name');
+            const priceInput = document.getElementById('product-edit-price');
+            const stockInput = document.getElementById('product-edit-stock');
+            const descriptionInput = document.getElementById('product-edit-description');
+            const stockHint = document.getElementById('product-edit-stock-hint');
+
+            modalElement.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) return;
+
+                form.action = trigger.getAttribute('data-edit-url') || '#';
+                nameInput.value = trigger.getAttribute('data-product-name') || '';
+                priceInput.value = trigger.getAttribute('data-product-price') || '';
+                descriptionInput.value = trigger.getAttribute('data-product-description') || '';
+                stockInput.value = trigger.getAttribute('data-product-stock') || '0';
+
+                const stockRecords = Number.parseInt(trigger.getAttribute('data-product-stock-records'), 10);
+                if (stockRecords === 1) {
+                    stockInput.disabled = false;
+                    stockInput.required = true;
+                    stockHint.hidden = true;
+                } else {
+                    stockInput.disabled = true;
+                    stockInput.required = false;
+                    stockHint.hidden = false;
+                    stockHint.textContent = 'Este producto tiene varios registros de stock; las existencias se administran desde Productos.';
                 }
             });
         })();

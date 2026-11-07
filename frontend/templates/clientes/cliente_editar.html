@@ -6,6 +6,7 @@
     <h1>Editar cliente</h1>
     <form method="post" action="{{ url_for('edit_client', client_id=cliente.id_cliente) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="origen" value="clientes">
         <div class="form-grid">
             <div>
                 <label for="nombre">Nombre *</label>

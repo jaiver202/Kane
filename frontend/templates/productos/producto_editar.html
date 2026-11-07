@@ -6,6 +6,7 @@
     <h1>Editar producto</h1>
     <form method="post" action="{{ url_for('edit_product', product_id=producto.id_producto) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="origen" value="productos">
         <label for="nombre_producto">Nombre *</label>
         <input id="nombre_producto" name="nombre_producto" maxlength="100"
                value="{{ producto.nombre_producto }}" required>

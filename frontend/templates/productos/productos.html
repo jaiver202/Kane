@@ -2,83 +2,791 @@
 
 {% block title %}Productos y stock | Kane{% endblock %}
 
-{% block content %}
-    <h1>Productos y existencias</h1>
-    <p>
-        <a href="{{ url_for('sales') }}">Volver a ventas</a> |
-        <a href="{{ url_for('dashboard') }}">Menú principal</a>
-    </p>
+{% block head %}
+    {{ super() }}
+    <style>
+        .inventory-page {
+            max-width: 1440px;
+            min-width: 0;
+            margin: 0 auto;
+        }
 
-    <section class="card">
-        <h2>Registrar producto</h2>
-        <form method="post" action="{{ url_for('create_product') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="form-grid">
-                <div>
-                    <label for="nombre_producto">Nombre *</label>
-                    <input id="nombre_producto" name="nombre_producto" maxlength="100" required>
-                </div>
-                <div>
-                    <label for="precio">Precio *</label>
-                    <input id="precio" name="precio" type="number" min="0" max="99999999.99"
-                           step="0.01" required>
-                </div>
-                <div>
-                    <label for="cantidad_disponible">Existencia inicial *</label>
-                    <input id="cantidad_disponible" name="cantidad_disponible" type="number"
-                           min="0" step="1" value="0" required>
-                </div>
-                <div>
-                    <label for="descripcion">Descripción</label>
-                    <input id="descripcion" name="descripcion">
+        .inventory-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .inventory-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .inventory-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .inventory-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .inventory-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+            border: 1px solid #b85a7a;
+            border-radius: 11px;
+            background: #b85a7a;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .inventory-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        .inventory-stats {
+            margin-bottom: 1rem;
+        }
+
+        .inventory-stat {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            height: 100%;
+            padding: .95rem 1.05rem;
+            border: 1px solid #eddee4;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .inventory-stat-icon {
+            display: flex;
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #f9e9ef;
+            color: #a83e69;
+            font-size: 1rem;
+        }
+
+        .inventory-stat-label {
+            color: #8d7580;
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .inventory-stat-value {
+            margin-top: .1rem;
+            color: #2a121d;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .inventory-card {
+            overflow: hidden;
+            min-width: 0;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .inventory-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.15rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .inventory-card-header h2 {
+            margin: 0;
+            color: #38232d;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .inventory-card-header p {
+            margin: .15rem 0 0;
+            color: #927d87;
+            font-size: .73rem;
+        }
+
+        .inventory-count {
+            padding: .3rem .65rem;
+            border-radius: 999px;
+            background: #f8edf1;
+            color: #a83e69;
+            font-size: .69rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .inventory-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            color: #725d67;
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+
+        .inventory-table thead th {
+            padding: .8rem 1.15rem;
+            border-bottom: 1px solid #f0e5e9;
+            background: #fdfafb;
+            color: #8d7580;
+            font-size: .63rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .inventory-table tbody td {
+            padding: .8rem 1.15rem;
+            border-bottom: 1px solid #f2e8ec;
+            vertical-align: middle;
+        }
+
+        .inventory-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .inventory-table tbody tr:hover {
+            background: #fdfafb;
+        }
+
+        .inventory-product {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-width: 0;
+        }
+
+        .inventory-product-icon {
+            display: flex;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 38px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: #f9e9ef;
+            color: #b13e6d;
+            font-size: .95rem;
+        }
+
+        .inventory-product-name {
+            color: #35202a;
+            font-weight: 700;
+        }
+
+        .inventory-product-description {
+            max-width: 320px;
+            overflow: hidden;
+            margin-top: .08rem;
+            color: #967f89;
+            font-size: .7rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .inventory-product-id {
+            margin-top: .05rem;
+            color: #b09aa3;
+            font-size: .64rem;
+        }
+
+        .inventory-price {
+            color: #a83e69;
+            font-weight: 700;
+        }
+
+        .inventory-stock {
+            display: inline-flex;
+            padding: .32rem .62rem;
+            border-radius: 999px;
+            background: #f4eef0;
+            color: #6f5b65;
+            font-size: .68rem;
+            font-weight: 600;
+        }
+
+        .inventory-stock-out {
+            background: #fdecec;
+            color: #b02a37;
+        }
+
+        .inventory-status {
+            display: inline-flex;
+            padding: .3rem .6rem;
+            border-radius: 999px;
+            font-size: .66rem;
+            font-weight: 700;
+        }
+
+        .inventory-status-ok {
+            background: #e8f6ee;
+            color: #198754;
+        }
+
+        .inventory-status-out {
+            background: #fdecec;
+            color: #b02a37;
+        }
+
+        .inventory-status-warning {
+            background: #fff4e5;
+            color: #b26a00;
+        }
+
+        .inventory-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: .25rem;
+        }
+
+        .inventory-action {
+            display: inline-flex;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #947d87;
+            font-size: .9rem;
+            text-decoration: none;
+        }
+
+        .inventory-action:hover {
+            background: #f8edf1;
+            color: #a83e69;
+        }
+
+        .inventory-action-disabled {
+            color: #c9b8bf;
+            cursor: not-allowed;
+        }
+
+        .inventory-action-disabled:hover {
+            background: transparent;
+            color: #c9b8bf;
+        }
+
+        .inventory-empty {
+            padding: 2.5rem 1rem !important;
+            color: #947e88;
+            text-align: center;
+        }
+
+        .inventory-modal-dialog {
+            max-width: 590px;
+        }
+
+        .inventory-modal {
+            overflow: hidden;
+            border: 1px solid #eddee4;
+            border-radius: 18px;
+            box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
+        }
+
+        .inventory-modal .modal-header {
+            align-items: flex-start;
+            padding: 1.05rem 1.4rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .inventory-modal-eyebrow {
+            margin-bottom: .2rem;
+            color: #a53d68;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .inventory-modal .modal-title {
+            margin: 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .inventory-modal .modal-body {
+            padding: 1.15rem 1.4rem;
+        }
+
+        .inventory-modal .modal-footer {
+            padding: .9rem 1.4rem;
+            border-top: 1px solid #f0e5e9;
+            background: #fdf9fa;
+        }
+
+        .inventory-label {
+            margin-bottom: .35rem;
+            color: #4b303c;
+            font-size: .74rem;
+            font-weight: 700;
+        }
+
+        .inventory-modal .form-control {
+            padding: .55rem .7rem;
+            border-color: #e8d9df;
+            border-radius: 10px;
+            color: #38232d;
+            font-size: .82rem;
+        }
+
+        .inventory-modal .form-control:focus {
+            border-color: #c97c98;
+            box-shadow: 0 0 0 .2rem rgba(184, 90, 122, .12);
+        }
+
+        .inventory-hint {
+            margin: .85rem 0 0;
+            padding: .55rem .7rem;
+            border-radius: 9px;
+            background: #fdf3e7;
+            color: #9a6323;
+            font-size: .72rem;
+        }
+
+        .inventory-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: .75rem .85rem;
+            border: 1px solid #f0e5e9;
+            border-radius: 11px;
+            background: #fdfafb;
+        }
+
+        .inventory-summary-label {
+            color: #967f89;
+            font-size: .7rem;
+        }
+
+        .inventory-summary-value {
+            color: #2a121d;
+            font-size: .86rem;
+            font-weight: 700;
+        }
+
+        .inventory-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+            border-radius: 11px;
+            font-size: .84rem;
+            font-weight: 700;
+        }
+
+        .inventory-button-secondary {
+            border: 1px solid #ead8df;
+            background: #fff;
+            color: #5b404b;
+        }
+
+        .inventory-button-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .inventory-button-primary {
+            border: 1px solid #b85a7a;
+            background: #b85a7a;
+            color: #fff;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .inventory-button-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        @media (max-width: 991.98px) {
+            .inventory-product-description {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .inventory-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .inventory-modal .modal-body,
+            .inventory-modal .modal-header,
+            .inventory-modal .modal-footer {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% set total_productos = productos|length %}
+    {% set total_unidades = productos|sum(attribute='cantidad_disponible') %}
+    {% set total_agotados = productos|selectattr('cantidad_disponible', 'equalto', 0)|list|length %}
+    <div class="inventory-page">
+        <div class="inventory-heading">
+            <div>
+                <div class="inventory-eyebrow">Inventario</div>
+                <h1 class="inventory-title">Productos y existencias</h1>
+                <p class="inventory-description">Administra tu catálogo, precios y stock disponible.</p>
+            </div>
+            <button type="button" class="inventory-primary" data-bs-toggle="modal" data-bs-target="#createProductModal">
+                <i class="bi bi-plus-lg"></i> Nuevo producto
+            </button>
+        </div>
+
+        <div class="row g-3 inventory-stats">
+            <div class="col-sm-4">
+                <div class="inventory-stat">
+                    <span class="inventory-stat-icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span>
+                    <div>
+                        <div class="inventory-stat-label">Productos registrados</div>
+                        <div class="inventory-stat-value">{{ total_productos }}</div>
+                    </div>
                 </div>
             </div>
-            <p><button type="submit">Guardar producto</button></p>
-        </form>
-    </section>
+            <div class="col-sm-4">
+                <div class="inventory-stat">
+                    <span class="inventory-stat-icon" aria-hidden="true"><i class="bi bi-layers"></i></span>
+                    <div>
+                        <div class="inventory-stat-label">Unidades en stock</div>
+                        <div class="inventory-stat-value">{{ total_unidades }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="inventory-stat">
+                    <span class="inventory-stat-icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></span>
+                    <div>
+                        <div class="inventory-stat-label">Productos agotados</div>
+                        <div class="inventory-stat-value">{{ total_agotados }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <section>
-        <h2>Inventario</h2>
-        {% if productos %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Existencias</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for producto in productos %}
+        <section class="inventory-card" aria-label="Inventario de productos">
+            <div class="inventory-card-header">
+                <div>
+                    <h2>Inventario</h2>
+                    <p>Revisa precios, existencias y actualiza tus productos.</p>
+                </div>
+                <span class="inventory-count">{{ total_productos }} producto{% if total_productos != 1 %}s{% endif %}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="inventory-table">
+                    <thead>
                         <tr>
-                            <td>{{ producto.nombre_producto }}</td>
-                            <td>${{ "%.2f"|format(producto.precio) }}</td>
-                            <td>
-                                {{ producto.cantidad_disponible }}
-                                {% if producto.registros_stock != 1 %}
-                                    <span class="error">(revisar registros de stock)</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{{ url_for('edit_product', product_id=producto.id_producto) }}">Editar</a>
-                                {% if producto.registros_stock == 1 %}
-                                    <form method="post"
-                                          action="{{ url_for('add_stock', product_id=producto.id_producto) }}">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <label for="cantidad-{{ producto.id_producto }}">Agregar unidades</label>
-                                        <input id="cantidad-{{ producto.id_producto }}" name="cantidad"
-                                               type="number" min="1" step="1" required>
-                                        <button type="submit">Agregar stock</button>
-                                    </form>
-                                {% endif %}
-                            </td>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Existencias</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col" class="text-end">Acciones</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No hay productos registrados.</p>
-        {% endif %}
-    </section>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                            <tr>
+                                <td>
+                                    <div class="inventory-product">
+                                        <span class="inventory-product-icon" aria-hidden="true"><i class="bi bi-cake2"></i></span>
+                                        <div>
+                                            <div class="inventory-product-name">{{ producto.nombre_producto }}</div>
+                                            <div class="inventory-product-description" title="{{ producto.descripcion or 'Sin descripción' }}">
+                                                {{ producto.descripcion or 'Sin descripción' }}
+                                            </div>
+                                            <div class="inventory-product-id">Producto #{{ producto.id_producto }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="inventory-price">{{ producto.precio|currency }}</span></td>
+                                <td>
+                                    <span class="inventory-stock {% if producto.cantidad_disponible <= 0 %}inventory-stock-out{% endif %}">
+                                        {{ producto.cantidad_disponible }} unidad{% if producto.cantidad_disponible != 1 %}es{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if producto.cantidad_disponible <= 0 %}
+                                        <span class="inventory-status inventory-status-out">Agotado</span>
+                                    {% elif producto.cantidad_disponible <= 3 %}
+                                        <span class="inventory-status inventory-status-warning">Stock bajo</span>
+                                    {% else %}
+                                        <span class="inventory-status inventory-status-ok">Disponible</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="inventory-actions">
+                                        <a class="inventory-action"
+                                           href="{{ url_for('edit_product', product_id=producto.id_producto) }}"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#editProductModal"
+                                           data-edit-url="{{ url_for('edit_product', product_id=producto.id_producto) }}"
+                                           data-product-name="{{ producto.nombre_producto }}"
+                                           data-product-price="{{ '%.2f'|format(producto.precio) }}"
+                                           data-product-description="{{ producto.descripcion or '' }}"
+                                           data-product-stock="{{ producto.cantidad_disponible }}"
+                                           data-product-stock-records="{{ producto.registros_stock }}"
+                                           title="Editar {{ producto.nombre_producto }}"
+                                           aria-label="Editar {{ producto.nombre_producto }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% if producto.registros_stock == 1 %}
+                                            <button type="button"
+                                                    class="inventory-action"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#addStockModal"
+                                                    data-stock-url="{{ url_for('add_stock', product_id=producto.id_producto) }}"
+                                                    data-product-name="{{ producto.nombre_producto }}"
+                                                    data-product-stock="{{ producto.cantidad_disponible }}"
+                                                    title="Agregar existencias a {{ producto.nombre_producto }}"
+                                                    aria-label="Agregar existencias a {{ producto.nombre_producto }}">
+                                                <i class="bi bi-plus-square"></i>
+                                            </button>
+                                        {% else %}
+                                            <button type="button"
+                                                    class="inventory-action inventory-action-disabled"
+                                                    disabled
+                                                    title="Revisa el registro de stock de {{ producto.nombre_producto }}"
+                                                    aria-label="No se puede agregar stock a {{ producto.nombre_producto }}">
+                                                <i class="bi bi-plus-square"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="inventory-empty" colspan="5">No hay productos registrados.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog inventory-modal-dialog modal-dialog-centered">
+            <div class="modal-content inventory-modal">
+                <form method="post" action="{{ url_for('create_product') }}" id="create-product-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="inventory-modal-eyebrow">Inventario</div>
+                            <h2 class="modal-title" id="createProductModalLabel">Nuevo producto</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label inventory-label" for="create-product-name">Nombre *</label>
+                                <input class="form-control" id="create-product-name" name="nombre_producto" maxlength="100" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label inventory-label" for="create-product-price">Precio *</label>
+                                <input class="form-control" id="create-product-price" name="precio" type="number" min="0" max="99999999.99" step="0.01" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label inventory-label" for="create-product-stock">Existencias *</label>
+                                <input class="form-control" id="create-product-stock" name="cantidad_disponible" type="number" min="0" max="2147483647" step="1" value="0" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label inventory-label" for="create-product-description">Descripción</label>
+                                <textarea class="form-control" id="create-product-description" name="descripcion" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="inventory-button inventory-button-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="inventory-button inventory-button-primary">Guardar producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog inventory-modal-dialog modal-dialog-centered">
+            <div class="modal-content inventory-modal">
+                <form method="post" action="#" id="edit-product-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="origen" value="productos">
+                    <div class="modal-header">
+                        <div>
+                            <div class="inventory-modal-eyebrow">Inventario</div>
+                            <h2 class="modal-title" id="editProductModalLabel">Editar producto</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label inventory-label" for="edit-product-name">Nombre *</label>
+                                <input class="form-control" id="edit-product-name" name="nombre_producto" maxlength="100" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label inventory-label" for="edit-product-price">Precio *</label>
+                                <input class="form-control" id="edit-product-price" name="precio" type="number" min="0" max="99999999.99" step="0.01" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label inventory-label" for="edit-product-stock">Existencias *</label>
+                                <input class="form-control" id="edit-product-stock" name="cantidad_disponible" type="number" min="0" max="2147483647" step="1" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label inventory-label" for="edit-product-description">Descripción</label>
+                                <textarea class="form-control" id="edit-product-description" name="descripcion" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <p class="inventory-hint" id="edit-product-stock-hint" hidden></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="inventory-button inventory-button-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="inventory-button inventory-button-primary">Guardar producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog inventory-modal-dialog modal-dialog-centered">
+            <div class="modal-content inventory-modal">
+                <form method="post" action="#" id="add-stock-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <div>
+                            <div class="inventory-modal-eyebrow">Inventario</div>
+                            <h2 class="modal-title" id="addStockModalLabel">Agregar existencias</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="inventory-summary">
+                            <div>
+                                <div class="inventory-summary-label">Producto</div>
+                                <div class="inventory-summary-value" id="stock-product-name">—</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="inventory-summary-label">Stock actual</div>
+                                <div class="inventory-summary-value" id="stock-current">0</div>
+                            </div>
+                        </div>
+                        <label class="form-label inventory-label" for="stock-quantity">Unidades a agregar *</label>
+                        <input class="form-control" id="stock-quantity" name="cantidad" type="number" min="1" step="1" value="1" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="inventory-button inventory-button-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="inventory-button inventory-button-primary">Agregar stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const createModal = document.getElementById('createProductModal');
+            if (createModal) {
+                const form = document.getElementById('create-product-form');
+                const nameInput = document.getElementById('create-product-name');
+
+                createModal.addEventListener('shown.bs.modal', () => nameInput.focus());
+                createModal.addEventListener('hidden.bs.modal', () => form.reset());
+            }
+
+            const editModal = document.getElementById('editProductModal');
+            if (editModal) {
+                const form = document.getElementById('edit-product-form');
+                const nameInput = document.getElementById('edit-product-name');
+                const priceInput = document.getElementById('edit-product-price');
+                const stockInput = document.getElementById('edit-product-stock');
+                const descriptionInput = document.getElementById('edit-product-description');
+                const stockHint = document.getElementById('edit-product-stock-hint');
+
+                editModal.addEventListener('show.bs.modal', event => {
+                    const trigger = event.relatedTarget;
+                    if (!trigger) return;
+
+                    form.action = trigger.getAttribute('data-edit-url') || '#';
+                    nameInput.value = trigger.getAttribute('data-product-name') || '';
+                    priceInput.value = trigger.getAttribute('data-product-price') || '';
+                    descriptionInput.value = trigger.getAttribute('data-product-description') || '';
+                    stockInput.value = trigger.getAttribute('data-product-stock') || '0';
+
+                    const stockRecords = Number.parseInt(trigger.getAttribute('data-product-stock-records'), 10);
+                    if (stockRecords === 1) {
+                        stockInput.disabled = false;
+                        stockInput.required = true;
+                        stockHint.hidden = true;
+                    } else {
+                        stockInput.disabled = true;
+                        stockInput.required = false;
+                        stockHint.hidden = false;
+                        stockHint.textContent = 'Este producto tiene varios registros de stock; las existencias no se pueden editar desde este formulario.';
+                    }
+                });
+            }
+
+            const stockModal = document.getElementById('addStockModal');
+            if (stockModal) {
+                const form = document.getElementById('add-stock-form');
+                const productName = document.getElementById('stock-product-name');
+                const currentStock = document.getElementById('stock-current');
+                const quantityInput = document.getElementById('stock-quantity');
+
+                stockModal.addEventListener('show.bs.modal', event => {
+                    const trigger = event.relatedTarget;
+                    if (!trigger) return;
+
+                    form.action = trigger.getAttribute('data-stock-url') || '#';
+                    productName.textContent = trigger.getAttribute('data-product-name') || '—';
+                    currentStock.textContent = trigger.getAttribute('data-product-stock') || '0';
+                    quantityInput.value = '1';
+                });
+            }
+        })();
+    </script>
 {% endblock %}

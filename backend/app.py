@@ -604,6 +604,8 @@ def create_product():
     name = request.form.get("nombre_producto", "").strip()
     description = request.form.get("descripcion", "").strip() or None
     raw_stock = request.form.get("cantidad_disponible", "").strip()
+    from_sales_page = request.form.get("origen") == "ventas"
+    target_endpoint = "sales" if from_sales_page else "products"
     try:
         price = parse_money(request.form.get("precio", ""), "El precio")
         quantity = int(raw_stock)
@@ -613,7 +615,7 @@ def create_product():
             raise ValueError("La existencia inicial debe ser un entero no negativo.")
     except ValueError as error:
         flash(str(error), "error")
-        return redirect(url_for("products"))
+        return redirect(url_for(target_endpoint))
 
     connection = None
     try:
@@ -640,7 +642,7 @@ def create_product():
         if connection is not None and connection.is_connected():
             connection.close()
 
-    return redirect(url_for("products"))
+    return redirect(url_for(target_endpoint))
 
 
 @app.route("/productos/<int:product_id>/editar", methods=["GET", "POST"])
@@ -650,17 +652,29 @@ def edit_product(product_id):
     if request.method == "POST":
         name = request.form.get("nombre_producto", "").strip()
         description = request.form.get("descripcion", "").strip() or None
+        raw_stock = request.form.get("cantidad_disponible", "").strip()
+        from_products_page = request.form.get("origen") == "productos"
         try:
             price = parse_money(request.form.get("precio", ""), "El precio")
             if not name or len(name) > 100:
                 raise ValueError("El nombre es obligatorio y no debe exceder 100 caracteres.")
+            quantity = None
+            if raw_stock:
+                quantity = int(raw_stock)
+                if quantity < 0 or quantity > 2147483647:
+                    raise ValueError("La existencia debe ser un entero no negativo.")
         except ValueError as error:
             flash(str(error), "error")
+            if from_products_page:
+                return redirect(url_for("products"))
             return redirect(url_for("edit_product", product_id=product_id))
 
+        connection = None
+        stock_warning = False
         try:
             connection = mysql.connector.connect(**DB_CONFIG)
-            with connection.cursor() as cursor:
+            connection.start_transaction()
+            with connection.cursor(dictionary=True) as cursor:
                 cursor.execute(
                     """
                     UPDATE producto
@@ -671,20 +685,48 @@ def edit_product(product_id):
                 )
                 if cursor.rowcount == 0:
                     cursor.execute(
-                        "SELECT id_producto FROM producto WHERE id_producto = %s",
+                        "SELECT id_producto FROM producto WHERE id_producto = %s FOR UPDATE",
                         (product_id,),
                     )
                     if cursor.fetchone() is None:
                         connection.rollback()
                         abort(404)
+
+                if quantity is not None:
+                    cursor.execute(
+                        "SELECT id_stock FROM stock WHERE id_producto = %s FOR UPDATE",
+                        (product_id,),
+                    )
+                    stock_rows = cursor.fetchall()
+                    if len(stock_rows) == 1:
+                        cursor.execute(
+                            "UPDATE stock SET cantidad_disponible = %s WHERE id_stock = %s",
+                            (quantity, stock_rows[0]["id_stock"]),
+                        )
+                    elif not stock_rows:
+                        cursor.execute(
+                            "INSERT INTO stock (id_producto, cantidad_disponible) VALUES (%s, %s)",
+                            (product_id, quantity),
+                        )
+                    else:
+                        stock_warning = True
+
             connection.commit()
-            flash("Producto actualizado correctamente.", "success")
+            if stock_warning:
+                flash(
+                    "Producto actualizado. No se modificaron las existencias porque tiene varios registros de stock.",
+                    "warning",
+                )
+            else:
+                flash("Producto actualizado correctamente.", "success")
             return redirect(url_for("products"))
         except Error:
             if connection is not None:
                 connection.rollback()
             app.logger.exception("No se pudo actualizar el producto %s.", product_id)
             flash("No se pudo actualizar el producto. Inténtalo de nuevo.", "error")
+            if from_products_page:
+                return redirect(url_for("products"))
             return redirect(url_for("edit_product", product_id=product_id))
         finally:
             if connection is not None and connection.is_connected():
@@ -777,12 +819,12 @@ def sales():
             client_list = cursor.fetchall()
             cursor.execute(
                 """
-                SELECT p.id_producto, p.nombre_producto, p.precio,
+                SELECT p.id_producto, p.nombre_producto, p.precio, p.descripcion,
                        COALESCE(SUM(s.cantidad_disponible), 0) AS cantidad_disponible,
                        COUNT(s.id_stock) AS registros_stock
                 FROM producto AS p
                 LEFT JOIN stock AS s ON s.id_producto = p.id_producto
-                GROUP BY p.id_producto, p.nombre_producto, p.precio
+                GROUP BY p.id_producto, p.nombre_producto, p.precio, p.descripcion
                 ORDER BY p.nombre_producto
                 """
             )
@@ -799,6 +841,92 @@ def sales():
         clientes=client_list,
         productos=product_list,
     )
+
+
+@app.post("/ventas/productos/<int:product_id>/editar")
+@roles_required("administrador", "vendedor")
+def edit_sale_product(product_id):
+    name = request.form.get("nombre_producto", "").strip()
+    description = request.form.get("descripcion", "").strip() or None
+    raw_stock = request.form.get("cantidad_disponible", "").strip()
+
+    try:
+        price = parse_money(request.form.get("precio", ""), "El precio")
+        if not name or len(name) > 100:
+            raise ValueError(
+                "El nombre es obligatorio y no debe exceder 100 caracteres."
+            )
+        quantity = None
+        if raw_stock:
+            quantity = int(raw_stock)
+            if quantity < 0 or quantity > 2147483647:
+                raise ValueError("La existencia debe ser un entero no negativo.")
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for("sales"))
+
+    connection = None
+    stock_warning = False
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        connection.start_transaction()
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                "SELECT id_producto FROM producto WHERE id_producto = %s FOR UPDATE",
+                (product_id,),
+            )
+            if cursor.fetchone() is None:
+                connection.rollback()
+                abort(404)
+
+            cursor.execute(
+                """
+                UPDATE producto
+                SET nombre_producto = %s, precio = %s, descripcion = %s
+                WHERE id_producto = %s
+                """,
+                (name, price, description, product_id),
+            )
+
+            if quantity is not None:
+                cursor.execute(
+                    "SELECT id_stock FROM stock WHERE id_producto = %s FOR UPDATE",
+                    (product_id,),
+                )
+                stock_rows = cursor.fetchall()
+                if len(stock_rows) == 1:
+                    cursor.execute(
+                        "UPDATE stock SET cantidad_disponible = %s WHERE id_stock = %s",
+                        (quantity, stock_rows[0]["id_stock"]),
+                    )
+                elif not stock_rows:
+                    cursor.execute(
+                        "INSERT INTO stock (id_producto, cantidad_disponible) VALUES (%s, %s)",
+                        (product_id, quantity),
+                    )
+                else:
+                    stock_warning = True
+
+        connection.commit()
+        if stock_warning:
+            flash(
+                "Producto actualizado. No se modificaron las existencias porque tiene varios registros de stock.",
+                "warning",
+            )
+        else:
+            flash("Producto actualizado correctamente.", "success")
+    except Error:
+        if connection is not None:
+            connection.rollback()
+        app.logger.exception(
+            "No se pudo actualizar el producto %s desde ventas.", product_id
+        )
+        flash("No se pudo actualizar el producto. Inténtalo de nuevo.", "error")
+    finally:
+        if connection is not None and connection.is_connected():
+            connection.close()
+
+    return redirect(url_for("sales"))
 
 
 @app.post("/ventas/crear")
@@ -977,6 +1105,200 @@ def format_currency(amount):
     else:
         number = f"{value:,.2f}"
     return "$ " + number.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+app.jinja_env.filters["currency"] = format_currency
+
+
+def add_report_participation(report_rows):
+    total = sum(row["cantidad_clientes"] for row in report_rows)
+    cumulative_count = 0
+    previous_percentage = 0
+    for row in report_rows:
+        cumulative_count += row["cantidad_clientes"]
+        cumulative_percentage = round(cumulative_count * 100 / total) if total else 0
+        row["participacion"] = cumulative_percentage - previous_percentage
+        previous_percentage = cumulative_percentage
+    return total
+
+
+def build_client_report_pdf(report_rows, total_clientes, report_date):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=18 * mm,
+        leftMargin=18 * mm,
+        topMargin=18 * mm,
+        bottomMargin=20 * mm,
+        title="Reporte de clientes por nacionalidad",
+        author="Dulce Gestión",
+        subject="Reporte CRM de clientes",
+    )
+
+    ink = colors.HexColor("#2A121D")
+    muted = colors.HexColor("#7D6671")
+    pink = colors.HexColor("#A83E69")
+    pink_soft = colors.HexColor("#F9E9EF")
+    line = colors.HexColor("#EDDEE4")
+
+    brand_style = ParagraphStyle(
+        "ReportBrand", fontName="Times-Bold", fontSize=22, leading=24, textColor=pink
+    )
+    subtitle_style = ParagraphStyle(
+        "ReportSubtitle",
+        fontName="Helvetica",
+        fontSize=8.5,
+        leading=11,
+        textColor=muted,
+    )
+    date_style = ParagraphStyle(
+        "ReportDate",
+        fontName="Helvetica",
+        fontSize=8.5,
+        leading=11,
+        textColor=muted,
+        alignment=TA_RIGHT,
+    )
+    title_style = ParagraphStyle(
+        "ReportTitle", fontName="Times-Bold", fontSize=17, leading=21, textColor=ink
+    )
+    header_cell_style = ParagraphStyle(
+        "ReportHeaderCell",
+        fontName="Helvetica-Bold",
+        fontSize=7.5,
+        leading=10,
+        textColor=pink,
+    )
+    cell_style = ParagraphStyle(
+        "ReportCell", fontName="Helvetica", fontSize=9, leading=12, textColor=ink
+    )
+    total_label_style = ParagraphStyle(
+        "ReportTotalLabel",
+        fontName="Helvetica-Bold",
+        fontSize=9.5,
+        leading=12,
+        textColor=ink,
+    )
+    empty_style = ParagraphStyle(
+        "ReportEmpty",
+        fontName="Helvetica",
+        fontSize=9,
+        leading=13,
+        textColor=muted,
+        alignment=TA_CENTER,
+    )
+
+    story = []
+    brand_cell = [
+        Paragraph("Dulce Gestión", brand_style),
+        Spacer(1, 3),
+        Paragraph("Reporte CRM de clientes", subtitle_style),
+    ]
+    date_cell = [Spacer(1, 9), Paragraph(xml_escape(report_date), date_style)]
+    header = Table(
+        [[brand_cell, date_cell]], colWidths=[doc.width * 0.7, doc.width * 0.3]
+    )
+    header.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
+    story.append(header)
+    story.append(Spacer(1, 10))
+    story.append(
+        HRFlowable(width="100%", thickness=0.8, color=line, spaceBefore=0, spaceAfter=0)
+    )
+    story.append(Spacer(1, 16))
+    story.append(Paragraph("Clasificación por nacionalidad", title_style))
+    story.append(Spacer(1, 14))
+
+    rows = [
+        [
+            Paragraph("NACIONALIDAD", header_cell_style),
+            Paragraph("CLIENTES", header_cell_style),
+            Paragraph("PARTICIPACIÓN", header_cell_style),
+        ]
+    ]
+    for row in report_rows:
+        rows.append(
+            [
+                Paragraph(xml_escape(str(row["pais"]).title()), cell_style),
+                Paragraph(str(row["cantidad_clientes"]), cell_style),
+                Paragraph(f"{row['participacion']}%", cell_style),
+            ]
+        )
+
+    if report_rows:
+        rows.append(
+            [
+                Paragraph("Total general", total_label_style),
+                Paragraph(str(total_clientes), total_label_style),
+                Paragraph("100%", total_label_style),
+            ]
+        )
+    else:
+        rows.append(
+            [
+                Paragraph("No hay clientes para incluir en el reporte.", empty_style),
+                "",
+                "",
+            ]
+        )
+
+    table = Table(
+        rows, colWidths=[doc.width * 0.5, doc.width * 0.22, doc.width * 0.28]
+    )
+    table_style = [
+        ("BACKGROUND", (0, 0), (-1, 0), pink_soft),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 9),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.5, line),
+    ]
+    if report_rows:
+        table_style.extend(
+            [
+                ("LINEABOVE", (0, -1), (-1, -1), 0.8, line),
+                ("LINEBELOW", (0, -1), (-1, -1), 0, line),
+            ]
+        )
+    else:
+        table_style.append(("SPAN", (0, -1), (-1, -1)))
+    table.setStyle(TableStyle(table_style))
+    story.append(table)
+
+    def draw_footer(canvas, document):
+        canvas.saveState()
+        canvas.setStrokeColor(line)
+        canvas.setLineWidth(0.6)
+        canvas.line(
+            document.leftMargin,
+            15 * mm,
+            letter[0] - document.rightMargin,
+            15 * mm,
+        )
+        canvas.setFont("Helvetica", 7.5)
+        canvas.setFillColor(muted)
+        canvas.drawString(
+            document.leftMargin, 10.5 * mm, "Dulce Gestión · Reporte CRM de clientes"
+        )
+        canvas.drawRightString(
+            letter[0] - document.rightMargin, 10.5 * mm, f"Página {document.page}"
+        )
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
+    buffer.seek(0)
+    return buffer
 
 
 def build_invoice_pdf(factura, items):
@@ -1515,7 +1837,31 @@ def clients():
         if connection is not None and connection.is_connected():
             connection.close()
 
-    return render_template("clientes/clientes.html", clientes=client_list)
+    clientes_por_pais = {}
+    for cliente in client_list:
+        cliente["fecha_registro_texto"] = format_date_es(cliente["fecha_registro"]).replace(".", "")
+        pais = cliente["pais"]
+        clientes_por_pais[pais] = clientes_por_pais.get(pais, 0) + 1
+
+    total_clientes_reporte = len(client_list)
+    report_rows = [
+        {
+            "pais": pais,
+            "cantidad_clientes": cantidad,
+        }
+        for pais, cantidad in sorted(
+            clientes_por_pais.items(), key=lambda item: (-item[1], item[0].casefold())
+        )
+    ] if total_clientes_reporte else []
+    add_report_participation(report_rows)
+
+    return render_template(
+        "clientes/clientes.html",
+        clientes=client_list,
+        reporte=report_rows,
+        total_clientes_reporte=total_clientes_reporte,
+        fecha_reporte=format_date_es(datetime.now()).replace(".", ""),
+    )
 
 
 @app.post("/clientes/crear")
@@ -1578,9 +1924,12 @@ def edit_client(client_id):
         telefono = request.form.get("telefono", "").strip() or None
         direccion = request.form.get("direccion", "").strip() or None
         ciudad = request.form.get("ciudad", "").strip() or None
+        from_clients_page = request.form.get("origen") == "clientes"
 
         if not nombre or not pais:
             flash("El nombre y el país son obligatorios.", "error")
+            if from_clients_page:
+                return redirect(url_for("clients"))
             return redirect(url_for("edit_client", client_id=client_id))
         if (
             len(nombre) > 100
@@ -1591,6 +1940,8 @@ def edit_client(client_id):
             or (ciudad is not None and len(ciudad) > 50)
         ):
             flash("Uno o más campos exceden la longitud permitida.", "error")
+            if from_clients_page:
+                return redirect(url_for("clients"))
             return redirect(url_for("edit_client", client_id=client_id))
 
         try:
@@ -1621,6 +1972,8 @@ def edit_client(client_id):
                 connection.rollback()
             app.logger.exception("No se pudo actualizar el cliente %s.", client_id)
             flash("No se pudo actualizar el cliente. Inténtalo de nuevo.", "error")
+            if from_clients_page:
+                return redirect(url_for("clients"))
             return redirect(url_for("edit_client", client_id=client_id))
         finally:
             if connection is not None and connection.is_connected():
@@ -1681,6 +2034,8 @@ def delete_client(client_id):
 @roles_required("administrador", "vendedor")
 def client_report():
     connection = None
+    report_rows = []
+    total_clientes = 0
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         with connection.cursor(dictionary=True) as cursor:
@@ -1693,6 +2048,7 @@ def client_report():
                 """
             )
             report_rows = cursor.fetchall()
+            total_clientes = add_report_participation(report_rows)
     except Error:
         app.logger.exception("No se pudo generar el reporte de clientes.")
         abort(503, description="No se pudo generar el reporte de clientes.")
@@ -1700,7 +2056,52 @@ def client_report():
         if connection is not None and connection.is_connected():
             connection.close()
 
-    return render_template("clientes/clientes_reporte.html", reporte=report_rows)
+    return render_template(
+        "clientes/clientes_reporte.html",
+        reporte=report_rows,
+        total_clientes_reporte=total_clientes,
+        fecha_reporte=format_date_es(datetime.now()).replace(".", ""),
+    )
+
+
+@app.get("/clientes/reporte/pdf")
+@roles_required("administrador", "vendedor")
+def client_report_pdf():
+    connection = None
+    report_rows = []
+    total_clientes = 0
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                """
+                SELECT pais, COUNT(*) AS cantidad_clientes
+                FROM cliente
+                GROUP BY pais
+                ORDER BY cantidad_clientes DESC, pais ASC
+                """
+            )
+            report_rows = cursor.fetchall()
+            total_clientes = add_report_participation(report_rows)
+    except Error:
+        app.logger.exception("No se pudo generar el PDF del reporte de clientes.")
+        abort(503, description="No se pudo generar el reporte de clientes.")
+    finally:
+        if connection is not None and connection.is_connected():
+            connection.close()
+
+    pdf_buffer = build_client_report_pdf(
+        report_rows,
+        total_clientes,
+        format_date_es(datetime.now()).replace(".", ""),
+    )
+    return send_file(
+        pdf_buffer,
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=f"reporte-clientes-{datetime.now():%Y-%m-%d}.pdf",
+    )
+
 
 
 @app.get("/db-check")

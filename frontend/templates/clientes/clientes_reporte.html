@@ -2,30 +2,198 @@
 
 {% block title %}Reporte de clientes | Kane{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <style>
+        .client-report-page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .client-report-page-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .client-report-page-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .client-report-page-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.7rem, 3vw, 2.2rem);
+            font-weight: 700;
+        }
+
+        .client-report-page-actions {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .client-report-paper {
+            padding: 2rem;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .client-report-paper-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .client-report-paper-brand {
+            color: #a83e69;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .client-report-paper-subtitle {
+            color: #86747c;
+            font-size: .76rem;
+        }
+
+        .client-report-paper-date {
+            color: #725d67;
+            font-size: .75rem;
+            white-space: nowrap;
+        }
+
+        .client-report-paper-divider {
+            margin: 1.1rem 0 1.25rem;
+            border: 0;
+            border-top: 1px solid #eddee4;
+        }
+
+        .client-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #38232d;
+            font-size: .82rem;
+        }
+
+        .client-report-table th {
+            padding: .6rem .7rem;
+            background: #f9e9ef;
+            color: #a83e69;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .client-report-table td {
+            padding: .7rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .client-report-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .client-report-total td {
+            border-top: 1px solid #eddee4;
+            font-weight: 700;
+        }
+
+        .client-report-empty {
+            padding: 1.5rem .7rem;
+            color: #947e88;
+            text-align: center;
+        }
+
+        @media (max-width: 767.98px) {
+            .client-report-page-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .client-report-paper {
+                padding: 1.25rem;
+            }
+        }
+
+        @media print {
+            .client-report-page-actions {
+                display: none;
+            }
+
+            .client-report-paper {
+                padding: 0;
+                border: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <div class="no-print">
-        <p><a href="{{ url_for('clients') }}">Volver a clientes</a></p>
-        <button type="button" onclick="window.print()">Imprimir reporte</button>
-    </div>
-    <h1>Clasificación de clientes por país</h1>
-    {% if reporte %}
-        <table>
-            <thead>
-                <tr>
-                    <th>País / nacionalidad</th>
-                    <th>Cantidad de clientes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for fila in reporte %}
+    <div class="client-report-page">
+        <div class="client-report-page-heading">
+            <div>
+                <div class="client-report-page-eyebrow">Reporte de clientes</div>
+                <h1 class="client-report-page-title">Clasificación por nacionalidad</h1>
+            </div>
+            <div class="client-report-page-actions">
+                <a class="btn btn-outline-secondary" href="{{ url_for('clients') }}">Volver a clientes</a>
+                <a class="btn btn-primary" href="{{ url_for('client_report_pdf') }}" target="_blank" rel="noopener">
+                    <i class="bi bi-download"></i> Descargar PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="client-report-paper">
+            <div class="client-report-paper-header">
+                <div>
+                    <div class="client-report-paper-brand">Dulce Gestión</div>
+                    <div class="client-report-paper-subtitle">Reporte CRM de clientes</div>
+                </div>
+                <div class="client-report-paper-date">{{ fecha_reporte }}</div>
+            </div>
+            <hr class="client-report-paper-divider">
+            <table class="client-report-table">
+                <thead>
                     <tr>
-                        <td>{{ fila.pais }}</td>
-                        <td>{{ fila.cantidad_clientes }}</td>
+                        <th scope="col">Nacionalidad</th>
+                        <th scope="col">Clientes</th>
+                        <th scope="col">Participación</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No hay clientes para incluir en el reporte.</p>
-    {% endif %}
+                </thead>
+                <tbody>
+                    {% for fila in reporte %}
+                        <tr>
+                            <td>{{ fila.pais|title }}</td>
+                            <td>{{ fila.cantidad_clientes }}</td>
+                            <td>{{ fila.participacion }}%</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td class="client-report-empty" colspan="3">No hay clientes para incluir en el reporte.</td>
+                        </tr>
+                    {% endfor %}
+                    {% if reporte %}
+                        <tr class="client-report-total">
+                            <td>Total general</td>
+                            <td>{{ total_clientes_reporte }}</td>
+                            <td>100%</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}

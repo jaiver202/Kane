@@ -244,7 +244,12 @@
             text-align: center;
         }
 
+        .client-modal-dialog {
+            max-width: 780px;
+        }
+
         .client-modal {
+            overflow: hidden;
             border: 1px solid #eddee4;
             border-radius: 18px;
             box-shadow: 0 22px 70px rgba(42, 18, 29, .24);
@@ -252,11 +257,12 @@
 
         .client-modal .modal-header {
             align-items: flex-start;
-            padding: 1.15rem 1.4rem;
+            padding: 1.05rem 1.4rem;
             border-bottom: 1px solid #f0e5e9;
         }
 
         .client-modal-eyebrow {
+            margin-bottom: .2rem;
             color: #a53d68;
             font-size: .64rem;
             font-weight: 700;
@@ -265,63 +271,205 @@
         }
 
         .client-modal .modal-title {
-            margin: .2rem 0 0;
+            margin: 0;
             color: #2a121d;
             font-family: 'Playfair Display', serif;
             font-size: 1.5rem;
             font-weight: 700;
         }
 
-        .client-modal-subtitle {
-            margin: .15rem 0 0;
-            color: #8a747e;
-            font-size: .8rem;
-        }
-
         .client-modal .modal-body {
-            padding: 1.2rem 1.4rem;
+            padding: 1.15rem 1.4rem;
         }
 
-        .client-modal .form-label {
+        .client-modal .modal-footer {
+            padding: .9rem 1.4rem;
+            border-top: 1px solid #f0e5e9;
+            background: #fdf9fa;
+        }
+
+        .client-modal-label {
             margin-bottom: .35rem;
-            color: #624b56;
-            font-size: .76rem;
+            color: #4b303c;
+            font-size: .74rem;
             font-weight: 700;
         }
 
         .client-modal .form-control {
-            padding: .62rem .7rem;
-            border: 1px solid #e8dbe0;
-            border-radius: 9px;
-            background-color: #fdfafb;
-            color: #39232d;
+            padding: .55rem .7rem;
+            border-color: #e8d9df;
+            border-radius: 10px;
+            color: #38232d;
             font-size: .82rem;
         }
 
         .client-modal .form-control:focus {
-            border-color: #cb8da6;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(216, 108, 144, .12);
+            border-color: #c97c98;
+            box-shadow: 0 0 0 .2rem rgba(184, 90, 122, .12);
         }
 
-        .client-modal .form-text {
-            color: #9c858f;
-            font-size: .72rem;
+        .client-modal-meta {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            padding: .6rem .75rem;
+            border: 1px solid #f0e5e9;
+            border-radius: 10px;
+            background: #fdfafb;
+            color: #7d6671;
+            font-size: .74rem;
         }
 
-        .client-modal .modal-footer {
-            padding: 1rem 1.4rem 1.15rem;
-            border-top: 1px solid #f0e5e9;
+        .client-modal-meta i {
+            color: #a83e69;
         }
 
-        .client-modal .clients-button {
+        .client-modal-meta strong {
+            margin-left: .15rem;
+            color: #38232d;
+        }
+
+        .client-modal-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
             min-height: 42px;
             padding: .6rem 1.1rem;
+            border-radius: 11px;
+            font-size: .84rem;
+            font-weight: 700;
+            text-decoration: none;
         }
 
-        .modal-backdrop.show {
-            opacity: .5;
-            backdrop-filter: blur(2px);
+        .client-modal-secondary {
+            border: 1px solid #ead8df;
+            background: #fff;
+            color: #5b404b;
+        }
+
+        .client-modal-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .client-modal-primary {
+            border: 1px solid #b85a7a;
+            background: #b85a7a;
+            color: #fff;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .client-modal-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        .client-report-modal-dialog {
+            max-width: 780px;
+        }
+
+        .client-report-modal .modal-header {
+            align-items: flex-start;
+            padding: 1.05rem 1.4rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .client-report-modal .modal-title {
+            margin: 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .client-report-modal .modal-body {
+            padding: 1.15rem 1.4rem;
+        }
+
+        .client-report-modal .modal-footer {
+            padding: .9rem 1.4rem;
+            border-top: 1px solid #f0e5e9;
+            background: #fdf9fa;
+        }
+
+        .client-report-sheet {
+            padding: 1.6rem 1.5rem;
+            border: 1px solid #eddee4;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .client-report-sheet-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .client-report-sheet-brand {
+            color: #a83e69;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .client-report-sheet-subtitle {
+            margin-top: .2rem;
+            color: #86747c;
+            font-size: .73rem;
+        }
+
+        .client-report-sheet-date {
+            color: #725d67;
+            font-size: .72rem;
+            white-space: nowrap;
+        }
+
+        .client-report-sheet-divider {
+            margin: 1rem 0 1.1rem;
+            border: 0;
+            border-top: 1px solid #eddee4;
+        }
+
+        .client-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #38232d;
+            font-size: .78rem;
+        }
+
+        .client-report-table th {
+            padding: .55rem .65rem;
+            background: #f9e9ef;
+            color: #a83e69;
+            font-size: .61rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .client-report-table td {
+            padding: .65rem;
+            border-bottom: 1px solid #f0e5e9;
+        }
+
+        .client-report-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .client-report-table .client-report-total td {
+            border-top: 1px solid #eddee4;
+            font-weight: 700;
+        }
+
+        .client-report-empty {
+            padding: 1.25rem .65rem;
+            color: #947e88;
+            text-align: center;
         }
 
         .clients-no-results[hidden],
@@ -351,14 +499,25 @@
             .clients-count {
                 align-self: flex-end;
             }
+
+            .client-modal .modal-body,
+            .client-modal .modal-header,
+            .client-modal .modal-footer,
+            .client-report-modal .modal-body,
+            .client-report-modal .modal-header,
+            .client-report-modal .modal-footer {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
         }
 
         @media (max-width: 575.98px) {
-            .client-modal .modal-header,
-            .client-modal .modal-body,
-            .client-modal .modal-footer {
-                padding-right: 1rem;
-                padding-left: 1rem;
+            .client-report-sheet {
+                padding: 1.1rem;
+            }
+
+            .client-report-sheet-header {
+                flex-direction: column;
             }
         }
     </style>
@@ -373,10 +532,10 @@
         </div>
 
         <div class="clients-toolbar">
-            <a class="clients-button" href="{{ url_for('client_report') }}">
+            <a class="clients-button" href="{{ url_for('client_report') }}" data-bs-toggle="modal" data-bs-target="#clientReportModal">
                 <i class="bi bi-printer"></i> Reporte
             </a>
-            <button class="clients-button clients-button-primary" type="button" data-bs-toggle="modal" data-bs-target="#newClientModal">
+            <button class="clients-button clients-button-primary" type="button" data-bs-toggle="modal" data-bs-target="#createClientModal">
                 <i class="bi bi-plus-lg"></i> Nuevo cliente
             </button>
         </div>
@@ -431,7 +590,9 @@
                                            data-client-phone="{{ cliente.telefono or '' }}"
                                            data-client-city="{{ cliente.ciudad or '' }}"
                                            data-client-address="{{ cliente.direccion or '' }}"
-                                           aria-label="Editar {{ cliente.nombre }}" title="Editar">
+                                           data-client-registered="{{ cliente.fecha_registro_texto or '—' }}"
+                                           aria-label="Editar {{ cliente.nombre }}"
+                                           title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <form class="client-action-form" method="post" action="{{ url_for('delete_client', client_id=cliente.id_cliente) }}" onsubmit="return confirm('¿Eliminar este cliente?');">
@@ -457,50 +618,49 @@
         </section>
     </div>
 
-    <div class="modal fade" id="newClientModal" tabindex="-1" aria-labelledby="newClientModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal fade" id="createClientModal" tabindex="-1" aria-labelledby="createClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog client-modal-dialog modal-dialog-centered">
             <div class="modal-content client-modal">
                 <form method="post" action="{{ url_for('create_client') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="modal-header">
                         <div>
                             <div class="client-modal-eyebrow">Información CRM</div>
-                            <h2 class="modal-title" id="newClientModalLabel">Nuevo cliente</h2>
-                            <p class="client-modal-subtitle">Completa la información para registrar un cliente.</p>
+                            <h2 class="modal-title" id="createClientModalLabel">Nuevo cliente</h2>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-12 col-sm-6">
-                                <label for="nombre" class="form-label">Nombre *</label>
-                                <input id="nombre" name="nombre" class="form-control" maxlength="100" required>
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-name">Nombre completo *</label>
+                                <input class="form-control" id="create-client-name" name="nombre" maxlength="100" required>
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="pais" class="form-label">País / nacionalidad *</label>
-                                <input id="pais" name="pais" class="form-control" maxlength="50" required>
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-country">Nacionalidad *</label>
+                                <input class="form-control" id="create-client-country" name="pais" maxlength="50" required>
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="email" class="form-label">Correo</label>
-                                <input id="email" name="email" type="email" class="form-control" maxlength="100">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-email">Correo</label>
+                                <input class="form-control" id="create-client-email" name="email" type="email" maxlength="100">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="telefono" class="form-label">Teléfono</label>
-                                <input id="telefono" name="telefono" class="form-control" maxlength="20">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-phone">Teléfono</label>
+                                <input class="form-control" id="create-client-phone" name="telefono" maxlength="20">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="ciudad" class="form-label">Ciudad</label>
-                                <input id="ciudad" name="ciudad" class="form-control" maxlength="50">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-city">Ciudad</label>
+                                <input class="form-control" id="create-client-city" name="ciudad" maxlength="50">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="direccion" class="form-label">Dirección</label>
-                                <input id="direccion" name="direccion" class="form-control" maxlength="150">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="create-client-address">Dirección</label>
+                                <input class="form-control" id="create-client-address" name="direccion" maxlength="150">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="clients-button" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="clients-button clients-button-primary">Guardar cliente</button>
+                        <button type="button" class="client-modal-button client-modal-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="client-modal-button client-modal-primary">Guardar cliente</button>
                     </div>
                 </form>
             </div>
@@ -508,58 +668,121 @@
     </div>
 
     <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog client-modal-dialog modal-dialog-centered">
             <div class="modal-content client-modal">
-                <form method="post" id="edit-client-form" action="">
+                <form method="post" action="#" id="edit-client-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="origen" value="clientes">
                     <div class="modal-header">
                         <div>
                             <div class="client-modal-eyebrow">Información CRM</div>
                             <h2 class="modal-title" id="editClientModalLabel">Editar cliente</h2>
-                            <p class="client-modal-subtitle">Actualiza los datos de contacto del cliente.</p>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-nombre" class="form-label">Nombre *</label>
-                                <input id="edit-nombre" name="nombre" class="form-control" maxlength="100" required>
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-name">Nombre completo *</label>
+                                <input class="form-control" id="edit-client-name" name="nombre" maxlength="100" required>
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-pais" class="form-label">País / nacionalidad *</label>
-                                <input id="edit-pais" name="pais" class="form-control" maxlength="50" required>
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-country">Nacionalidad *</label>
+                                <input class="form-control" id="edit-client-country" name="pais" maxlength="50" required>
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-email" class="form-label">Correo</label>
-                                <input id="edit-email" name="email" type="email" class="form-control" maxlength="100">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-email">Correo</label>
+                                <input class="form-control" id="edit-client-email" name="email" type="email" maxlength="100">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-telefono" class="form-label">Teléfono</label>
-                                <input id="edit-telefono" name="telefono" class="form-control" maxlength="20">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-phone">Teléfono</label>
+                                <input class="form-control" id="edit-client-phone" name="telefono" maxlength="20">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-ciudad" class="form-label">Ciudad</label>
-                                <input id="edit-ciudad" name="ciudad" class="form-control" maxlength="50">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-city">Ciudad</label>
+                                <input class="form-control" id="edit-client-city" name="ciudad" maxlength="50">
                             </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="edit-direccion" class="form-label">Dirección</label>
-                                <input id="edit-direccion" name="direccion" class="form-control" maxlength="150">
+                            <div class="col-sm-6">
+                                <label class="form-label client-modal-label" for="edit-client-address">Dirección</label>
+                                <input class="form-control" id="edit-client-address" name="direccion" maxlength="150">
+                            </div>
+                            <div class="col-12">
+                                <div class="client-modal-meta">
+                                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                    <span>Cliente registrado el&nbsp;<strong id="edit-client-registered">—</strong></span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="clients-button" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="clients-button clients-button-primary">Guardar cliente</button>
+                        <button type="button" class="client-modal-button client-modal-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="client-modal-button client-modal-primary">Guardar cliente</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-
-    
-
+    <div class="modal fade" id="clientReportModal" tabindex="-1" aria-labelledby="clientReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog client-report-modal-dialog modal-dialog-centered">
+            <div class="modal-content client-report-modal">
+                <div class="modal-header">
+                    <div>
+                        <div class="client-modal-eyebrow">Reporte de clientes</div>
+                        <h2 class="modal-title" id="clientReportModalLabel">Clasificación por nacionalidad</h2>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="client-report-sheet">
+                        <div class="client-report-sheet-header">
+                            <div>
+                                <div class="client-report-sheet-brand">Dulce Gestión</div>
+                                <div class="client-report-sheet-subtitle">Reporte CRM de clientes</div>
+                            </div>
+                            <div class="client-report-sheet-date">{{ fecha_reporte }}</div>
+                        </div>
+                        <hr class="client-report-sheet-divider">
+                        <table class="client-report-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nacionalidad</th>
+                                    <th scope="col">Clientes</th>
+                                    <th scope="col">Participación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in reporte %}
+                                    <tr>
+                                        <td>{{ fila.pais|title }}</td>
+                                        <td>{{ fila.cantidad_clientes }}</td>
+                                        <td>{{ fila.participacion }}%</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td class="client-report-empty" colspan="3">No hay clientes para incluir en el reporte.</td>
+                                    </tr>
+                                {% endfor %}
+                                {% if reporte %}
+                                    <tr class="client-report-total">
+                                        <td>Total general</td>
+                                        <td>{{ total_clientes_reporte }}</td>
+                                        <td>100%</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="client-modal-button client-modal-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a class="client-modal-button client-modal-primary" href="{{ url_for('client_report_pdf') }}" target="_blank" rel="noopener">
+                        <i class="bi bi-printer"></i> Imprimir reporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         (() => {
@@ -567,39 +790,6 @@
             const rows = Array.from(document.querySelectorAll('.client-row'));
             const count = document.getElementById('client-count');
             const noResults = document.getElementById('clients-no-results');
-            const editModal = document.getElementById('editClientModal');
-            const editForm = document.getElementById('edit-client-form');
-            const newModal = document.getElementById('newClientModal');
-
-            if (editModal && editForm) {
-                editModal.addEventListener('show.bs.modal', event => {
-                    const trigger = event.relatedTarget;
-                    if (!trigger) return;
-
-                    editForm.action = trigger.getAttribute('data-edit-url') || '';
-
-                    const fill = (id, value) => {
-                        const field = document.getElementById(id);
-                        if (field) field.value = value || '';
-                    };
-
-                    fill('edit-nombre', trigger.getAttribute('data-client-name'));
-                    fill('edit-pais', trigger.getAttribute('data-client-country'));
-                    fill('edit-email', trigger.getAttribute('data-client-email'));
-                    fill('edit-telefono', trigger.getAttribute('data-client-phone'));
-                    fill('edit-ciudad', trigger.getAttribute('data-client-city'));
-                    fill('edit-direccion', trigger.getAttribute('data-client-address'));
-                });
-
-                editModal.addEventListener('hidden.bs.modal', () => editForm.reset());
-            }
-
-            if (newModal) {
-                newModal.addEventListener('hidden.bs.modal', () => {
-                    const form = newModal.querySelector('form');
-                    if (form) form.reset();
-                });
-            }
 
             search.addEventListener('input', () => {
                 const query = search.value.trim().toLocaleLowerCase();
@@ -614,6 +804,32 @@
                 count.textContent = `${visible} ${visible === 1 ? 'cliente' : 'clientes'}`;
                 noResults.hidden = visible > 0 || rows.length === 0;
             });
+
+            const editModal = document.getElementById('editClientModal');
+            if (editModal) {
+                const form = document.getElementById('edit-client-form');
+                const nameInput = document.getElementById('edit-client-name');
+                const countryInput = document.getElementById('edit-client-country');
+                const emailInput = document.getElementById('edit-client-email');
+                const phoneInput = document.getElementById('edit-client-phone');
+                const cityInput = document.getElementById('edit-client-city');
+                const addressInput = document.getElementById('edit-client-address');
+                const registeredOutput = document.getElementById('edit-client-registered');
+
+                editModal.addEventListener('show.bs.modal', event => {
+                    const trigger = event.relatedTarget;
+                    if (!trigger) return;
+
+                    form.action = trigger.getAttribute('data-edit-url') || '#';
+                    nameInput.value = trigger.getAttribute('data-client-name') || '';
+                    countryInput.value = trigger.getAttribute('data-client-country') || '';
+                    emailInput.value = trigger.getAttribute('data-client-email') || '';
+                    phoneInput.value = trigger.getAttribute('data-client-phone') || '';
+                    cityInput.value = trigger.getAttribute('data-client-city') || '';
+                    addressInput.value = trigger.getAttribute('data-client-address') || '';
+                    registeredOutput.textContent = trigger.getAttribute('data-client-registered') || '—';
+                });
+            }
         })();
     </script>
 {% endblock %}
