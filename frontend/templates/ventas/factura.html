@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Factura {{ factura.numero_factura }} | CandyKane{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .invoice-page {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        .invoice-page-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .invoice-page-eyebrow {
+            color: #a53d68;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .invoice-page-title {
+            margin: .25rem 0 0;
+            color: #2a121d;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 2.45rem);
+            font-weight: 700;
+        }
+
+        .invoice-page-description {
+            margin: .2rem 0 0;
+            color: #86747c;
+            font-size: .88rem;
+        }
+
+        .invoice-page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: .55rem;
+        }
+
+        .invoice-paper {
+            padding: 2rem 2.2rem;
+            border: 1px solid #eddee4;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(42, 18, 29, .035);
+        }
+
+        .invoice-sheet-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .invoice-brand {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .invoice-brand-icon {
+            display: inline-flex;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #d86c90;
+            color: #fff;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .invoice-brand-name {
+            color: #a83e69;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .invoice-brand-tagline {
+            margin-top: .15rem;
+            color: #8a747e;
+            font-size: .69rem;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta-label {
+            color: #a53d68;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .invoice-meta-number {
+            margin-top: .18rem;
+            color: #2a121d;
+            font-size: 1.08rem;
+            font-weight: 700;
+        }
+
+        .invoice-meta-date {
+            margin-top: .12rem;
+            color: #7d6671;
+            font-size: .76rem;
+        }
+
+        .invoice-divider {
+            margin: .95rem 0 1rem;
+            border-color: #eddee4;
+            opacity: 1;
+        }
+
+        .invoice-parties {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .invoice-label {
+            color: #a53d68;
+            font-size: .61rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .invoice-client,
+        .invoice-seller {
+            margin-top: .2rem;
+            color: #2a121d;
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .invoice-contact {
+            margin-top: .1rem;
+            color: #8a747e;
+            font-size: .74rem;
+        }
+
+        .invoice-parties-right {
+            text-align: right;
+        }
+
+        .invoice-table-wrap {
+            margin-top: 1.05rem;
+        }
+
+        .invoice-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            font-size: .77rem;
+        }
+
+        .invoice-table thead th {
+            padding: .52rem .6rem;
+            border: 0;
+            background: #f9e9ef;
+            color: #a53d68;
+            font-size: .6rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .invoice-table tbody td {
+            padding: .62rem .6rem;
+            border-bottom: 1px solid #f2e8ec;
+            color: #725d67;
+            vertical-align: middle;
+        }
+
+        .invoice-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .invoice-table th:not(:first-child),
+        .invoice-table td:not(:first-child) {
+            text-align: right;
+        }
+
+        .invoice-items-empty {
+            color: #947e88 !important;
+            text-align: center !important;
+        }
+
+        .invoice-totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: .65rem;
+        }
+
+        .invoice-totals-box {
+            width: min(100%, 260px);
+        }
+
+        .invoice-total-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .28rem 0;
+            color: #7d6671;
+            font-size: .8rem;
+        }
+
+        .invoice-total-row span:last-child {
+            color: #2a121d;
+            font-weight: 600;
+        }
+
+        .invoice-total-final {
+            margin-top: .3rem;
+            padding-top: .62rem;
+            border-top: 1px solid #eddee4;
+            color: #2a121d;
+            font-size: .92rem;
+            font-weight: 700;
+        }
+
+        .invoice-total-final span:last-child {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .invoice-thanks {
+            margin: 1.5rem 0 .2rem;
+            color: #9c858f;
+            font-size: .74rem;
+            text-align: center;
+        }
+
+        .invoice-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            min-height: 42px;
+            padding: .6rem 1.1rem;
+            border-radius: 11px;
+            font-size: .84rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .invoice-button-secondary {
+            border: 1px solid #ead8df;
+            background: #fff;
+            color: #5b404b;
+        }
+
+        .invoice-button-secondary:hover {
+            background: #fbf4f7;
+            color: #5b263d;
+        }
+
+        .invoice-button-primary {
+            border: 1px solid #b85a7a;
+            background: #b85a7a;
+            color: #fff;
+            box-shadow: 0 5px 12px rgba(111, 35, 67, .16);
+        }
+
+        .invoice-button-primary:hover {
+            border-color: #a34d6b;
+            background: #a34d6b;
+            color: #fff;
+        }
+
+        @media (max-width: 767.98px) {
+            .invoice-page-heading,
+            .invoice-sheet-header,
+            .invoice-parties {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .invoice-page-actions {
+                justify-content: flex-start;
+            }
+
+            .invoice-meta,
+            .invoice-parties-right {
+                text-align: left;
+            }
+
+            .invoice-paper {
+                padding: 1.25rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff !important;
+            }
+
+            aside,
+            header,
+            .invoice-page-actions {
+                display: none !important;
+            }
+
+            .d-flex.min-vh-100 {
+                display: block !important;
+            }
+
+            main {
+                padding: 0 !important;
+            }
+
+            .invoice-page {
+                max-width: none;
+            }
+
+            .invoice-page-heading {
+                margin-bottom: .8rem;
+            }
+
+            .invoice-paper {
+                padding: 0;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="invoice-page">
+        <div class="invoice-page-heading">
+            <div>
+                <div class="invoice-page-eyebrow">Facturación</div>
+                <h1 class="invoice-page-title">Factura de venta</h1>
+                <p class="invoice-page-description">Comprobante generado correctamente.</p>
+            </div>
+            <div class="invoice-page-actions">
+                <a class="invoice-button invoice-button-secondary" href="{{ url_for('sales') }}">
+                    <i class="bi bi-arrow-left"></i> Volver a ventas
+                </a>
+                <a class="invoice-button invoice-button-secondary" href="{{ url_for('invoices') }}">
+                    <i class="bi bi-receipt"></i> Ver facturas
+                </a>
+                <a class="invoice-button invoice-button-primary" href="{{ url_for('invoice_pdf', invoice_id=factura.id_factura) }}">
+                    <i class="bi bi-download"></i> Descargar PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="invoice-paper">
+            <div class="invoice-sheet-header">
+                <div class="invoice-brand">
+                    <span class="invoice-brand-icon" aria-hidden="true">C</span>
+                    <div>
+                        <div class="invoice-brand-name">CandyKane</div>
+                        <div class="invoice-brand-tagline">Postrería · CRM + POS</div>
+                    </div>
+                </div>
+                <div class="invoice-meta">
+                    <div class="invoice-meta-label">Factura de venta</div>
+                    <div class="invoice-meta-number">{{ factura.numero_factura }}</div>
+                    <div class="invoice-meta-date">{{ fecha_factura }}</div>
+                </div>
+            </div>
+
+            <hr class="invoice-divider">
+
+            <div class="invoice-parties">
+                <div>
+                    <div class="invoice-label">Facturado a</div>
+                    <div class="invoice-client">{{ factura.cliente }}</div>
+                    <div class="invoice-contact">
+                        {% if factura.telefono_cliente %}Tel. {{ factura.telefono_cliente }}{% endif %}
+                        {% if factura.telefono_cliente and factura.email_cliente %} · {% endif %}
+                        {% if factura.email_cliente %}{{ factura.email_cliente }}{% endif %}
+                    </div>
+                </div>
+                <div class="invoice-parties-right">
+                    <div class="invoice-label">Atendido por</div>
+                    <div class="invoice-seller">{{ factura.vendedor }}</div>
+                </div>
+            </div>
+
+            <div class="table-responsive invoice-table-wrap">
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Cant.</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td>{{ item.nombre_producto }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>{{ item.precio_unitario|currency }}</td>
+                                <td>{{ item.subtotal|currency }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="invoice-items-empty" colspan="4">Sin detalle de productos.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="invoice-totals">
+                <div class="invoice-totals-box">
+                    <div class="invoice-total-row">
+                        <span>Subtotal</span>
+                        <span>{{ items|sum(attribute='subtotal')|currency }}</span>
+                    </div>
+                    <div class="invoice-total-row invoice-total-final">
+                        <span>Total</span>
+                        <span>{{ factura.total|currency }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="invoice-thanks">Gracias por endulzar tu día con nosotros.</p>
+        </div>
+    </div>
+{% endblock %}
